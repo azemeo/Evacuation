@@ -13,24 +13,34 @@ public abstract class BaseBuilding : PurchasableObject {
     }
     #endregion
 
-    protected BuildingLevel _buildingLevel;
-
     [Header("Building Setup")]
     [SerializeField] private GameObject _constructionGraphic;
-    [SerializeField]
-    private GameObject _upgradeGraphic;
 
     [SerializeField]
-    private bool _requiresBuilder = true;
+    protected BuildingLevel _buildingLevel;
 
-	[SerializeField]
+    [SerializeField]
+    private bool _requiresBuilder = false;
+
+    [SerializeField]
     protected GameObject _model;
 
-    protected float _collisionRadiusSquared;
+    [SerializeField]
+    protected float _fillRate = 0.1f;
 
-    protected int _currentLevel;
+    [SerializeField]
+    protected float _drainRate = 0.05f;
 
     protected bool _isAlive = true;
+    [SerializeField]
+    protected float _currentFill = 0;
+    protected float _height = 0;
+    protected bool _isFlooded = false;
+
+    private bool _filledThisFrame = false;
+
+    [SerializeField]
+    protected WaterPlane _waterPlane;
 
 
     #region MonoBehaviour Methods
@@ -38,13 +48,13 @@ public abstract class BaseBuilding : PurchasableObject {
     protected override void OnEnable()
     {
         base.OnEnable();
-		TimerManager.onTimerExpired += new TimerManager.TimerExpiredDelegate(onTimerExpired);
+        TimerManager.onTimerExpired += new TimerManager.TimerExpiredDelegate(onTimerExpired);
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-		TimerManager.onTimerExpired -= new TimerManager.TimerExpiredDelegate(onTimerExpired);
+        TimerManager.onTimerExpired -= new TimerManager.TimerExpiredDelegate(onTimerExpired);
     }
 
     protected virtual void onTimerExpired(TimerManager.TimerEventData eventData)
@@ -59,42 +69,38 @@ public abstract class BaseBuilding : PurchasableObject {
 
     #region Core Methods
 
-	protected override void StartBuild()
+    protected override void StartBuild()
     {
-		if (BuildingCost.BuildTime > 0)
+        if (BuildingCost.BuildTime > 0)
         {
             if (_requiresBuilder) AssignBuilder();
 
             TimerManager.Instance.StartTimerNow(UID + "_build", BuildingCost.BuildTime);
-			UIManager.Instance.Get<UIBuildTimersPanel>(UIManager.PanelID.BuildTimersPanel).AddTimer(UID + "_build", UIAnchor, Vector3.up * 2);
+            UIManager.Instance.Get<UIBuildTimersPanel>(UIManager.PanelID.BuildTimersPanel).AddTimer(UID + "_build", UIAnchor, Vector3.up * 2);
             if (_constructionGraphic != null)
             {
                 _constructionGraphic.SetActive(true);
                 Model.gameObject.SetActive(false);
-            }
-            if (_upgradeGraphic != null)
-            {
-                _upgradeGraphic.SetActive(true);
             }
 
             BuildStarted();
         }
         else
         {
-			BuildComplete(DateTime.Now);
+            BuildComplete(DateTime.Now);
         }
     }
 
-	public override void OnSpawned ()
-	{
-		base.OnSpawned ();
+    public override void OnSpawned()
+    {
+        base.OnSpawned();
 
-		Vector3 modelLocalPosition = _collider.transform.localPosition;
-		modelLocalPosition.y = 0;
-		_model.transform.localPosition = modelLocalPosition;
-	}
+        Vector3 modelLocalPosition = _collider.transform.localPosition;
+        modelLocalPosition.y = 0;
+        _model.transform.localPosition = modelLocalPosition;
+    }
 
-	protected virtual void BuildStarted() {}
+    protected virtual void BuildStarted() { }
 
     public virtual void BuildComplete(System.DateTime timeCompleted)
     {
@@ -115,7 +121,89 @@ public abstract class BaseBuilding : PurchasableObject {
 
         UIManager.Instance.Get<UIBuildTimersPanel>(UIManager.PanelID.BuildTimersPanel).RemoveTimer(UID + "_build");
 
-		//AudioManager.Instance.Play(AudioSFXDatabase.Instance.BuildSFX, AudioManager.AudioGroup.Building_Created);
+        //AudioManager.Instance.Play(AudioSFXDatabase.Instance.BuildSFX, AudioManager.AudioGroup.Building_Created);
+    }
+
+    public virtual void FillFromNeighbour(BaseBuilding neighbour)
+    {
+        if (neighbour.Height >= Height || neighbour.IsFlooded)
+        {
+            AddToFillAmount(neighbour.CurrentFillAmount * FillRate * Time.deltaTime);
+        }
+    }
+
+    public virtual void AddToFillAmount(float fillPctAdded)
+    {
+        if (fillPctAdded <= 0) return;
+        if (_currentFill < 1f)
+        {
+            _currentFill = Mathf.Clamp01(_currentFill + fillPctAdded);
+
+            if(_currentFill > 0)
+            {
+                if(_waterPlane != null)
+                {
+                    _waterPlane.SetFill(CurrentFillAmount);
+                }
+            }
+
+            if (_currentFill == 1f)
+            {
+                Flood();
+            }
+        }
+    }
+
+    protected virtual void Flood()
+    {
+        _currentFill = 1f;
+        _isFlooded = true;
+        if (_waterPlane != null)
+        {
+            _waterPlane.SetFill(CurrentFillAmount);
+        }
+    }
+
+    public virtual void Drain(float amount)
+    {
+        if(CurrentFillAmount > 0)
+        {
+            _currentFill = Mathf.Clamp01(_currentFill - amount);
+
+            if (IsFlooded && CurrentFillAmount <= 0)
+            {
+                Reclaim();
+            }
+        }
+    }
+
+    protected virtual void Reclaim()
+    {
+        _currentFill = 0;
+        _isFlooded = false;
+        if (_waterPlane != null)
+        {
+            _waterPlane.SetFill(0f);
+        }
+    }
+
+    protected virtual void Update()
+    {
+        if (!HasBeenPlaced) return;
+        if (CurrentFillAmount > 0)
+        {
+            GridCell[] neighbours = GridManager.Instance.GetNeighbors(Coordinates);
+            for (int i = 0; i < neighbours.Length; i++)
+            {
+                if (neighbours[i].IsOccupied && neighbours[i].Occupant is BaseBuilding)
+                {
+                    BaseBuilding bb = neighbours[i].Occupant as BaseBuilding;
+                    bb.FillFromNeighbour(this);
+                }
+            }
+
+            Drain(_drainRate * Time.deltaTime);
+        }
     }
 
     #endregion
@@ -157,6 +245,32 @@ public abstract class BaseBuilding : PurchasableObject {
         {
             return _model;
         }
+    }
+
+    public float FillRate
+    {
+        get { return _fillRate; }
+    }
+
+    public float CurrentFillAmount
+    {
+        get { return _currentFill; }
+    }
+
+    public bool IsFlooded
+    {
+        get { return _isFlooded; }
+    }
+
+    public float Height
+    {
+        get { return _height; }
+    }
+
+    public float DrainRate
+    {
+        get { return _drainRate; }
+        set { _drainRate = value; }
     }
     #endregion
 }

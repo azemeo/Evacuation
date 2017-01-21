@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ApartmentBuilding : BaseBuilding
+public class Building : BaseBuilding
 {
     public override int GridObjectType
     {
@@ -12,4 +12,7 @@ public class ApartmentBuilding : BaseBuilding
             return GridObjectTypes.Building.BUILDING;
         }
     }
+
+    [SerializeField]
+    private int _occupants = 0;
 }

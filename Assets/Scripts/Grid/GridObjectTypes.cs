@@ -12,4 +12,9 @@ public static class GridObjectTypes
         public const int PUMP = 2;
         public const int WALL = 3;
     }
+
+    public static class Other
+    {
+        public const int OCEAN = 100;
+    }
 }
