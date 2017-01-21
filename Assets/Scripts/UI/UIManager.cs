@@ -14,7 +14,9 @@ public class UIManager : SingletonBehavior<UIManager>
         GameMessagePanel = 4
     }
 
-    public Text CountdownDisplay, WaveStatsDisplay;
+    public Text CountdownDisplay;
+    public Text CashDisplay;
+    //public Text WaveStatsDisplay;
 
     [System.Serializable]
     public class UIStateData
@@ -143,7 +145,8 @@ public class UIManager : SingletonBehavior<UIManager>
         {
             System.TimeSpan timeToWave = System.TimeSpan.FromSeconds(WaveManager.Instance.NextWaveTime - Time.time);
             CountdownDisplay.text = string.Format("{0}:{1} until wave {2}", timeToWave.Minutes, timeToWave.Seconds, WaveManager.Instance.NextWave);
-            WaveStatsDisplay.text = string.Format("Height: {0}m   Danger: {1}", WaveManager.Instance.GetWaveHeight(), WaveManager.Instance.GetWaveDanger());
+            CashDisplay.text = "$" + PlayerProfileManager.Instance.GetResourceBalance(Helpers.ResourceType.Cash);
+            //WaveStatsDisplay.text = string.Format("Height: {0}m   Danger: {1}", WaveManager.Instance.GetWaveHeight(), WaveManager.Instance.GetWaveDanger());
         }
     }
 

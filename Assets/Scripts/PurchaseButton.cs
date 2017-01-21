@@ -22,26 +22,25 @@ public class PurchaseButton : MonoBehaviour {
 
     public void OnMouseEnter()
     {
-        print("Mouseover");
         popup.gameObject.SetActive(true);
     }
 
     public void OnMouseExit()
     {
-        print("Mouse Exit");
         popup.gameObject.SetActive(false);
     }
 
-    public void Buy(string itemName)
+    public void Buy()
     {
 
 
         if (BuildingCreator.Instance.CreateBuilding(_templateID))
         {
-            print("Purchased" + itemName);
+            print("Purchased" + _templateID);
         }
         else
         {
+            print("Purchase Failed");
             GameManager.Instance.ShowMessage("Not enough Cash!");
         }
     }
