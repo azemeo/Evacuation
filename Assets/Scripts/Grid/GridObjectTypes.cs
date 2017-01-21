@@ -11,6 +11,7 @@ public static class GridObjectTypes
         public const int BLOCKADE = 1;
         public const int PUMP = 2;
         public const int WALL = 3;
+        public const int ROAD = 4;
     }
 
     public static class Other

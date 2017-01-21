@@ -23,6 +23,14 @@ public abstract class GridObject : ConfigurableObject
     private bool _isPlaceable = true;
     private bool _isSelected = false;
 
+    [SerializeField]
+    private GridObject _attachment;
+    [SerializeField]
+    private GridObject _parentObject;
+
+    [SerializeField]
+    private bool _attachable = false;
+
     private string _uid = "";
 	private string _name;
 
@@ -34,11 +42,29 @@ public abstract class GridObject : ConfigurableObject
     public GridEvent OnDetached;
     public GridEvent OnConfirmPlacement;
 
-	protected bool _isDirty;
-
 	protected AIAgent _assignedBuilder;
 
-	public void SetCoordinates(Vector2Int coords, bool updatePosition = true)
+    [SerializeField]
+    protected float _fillRate = 0.1f;
+
+    [SerializeField]
+    protected float _drainRate = 0.05f;
+
+    [SerializeField]
+    protected float _currentFill = 0;
+    [SerializeField]
+    protected float _height = 0;
+    protected bool _isFlooded = false;
+
+    [SerializeField]
+    protected bool _blockWater = false;
+    [SerializeField]
+    protected bool _blockPeople = false;
+
+    [SerializeField]
+    protected WaterPlane _waterPlane;
+
+    public void SetCoordinates(Vector2Int coords, bool updatePosition = true)
 	{
 		_coordinates = coords;
 		if (updatePosition)
@@ -183,7 +209,14 @@ public abstract class GridObject : ConfigurableObject
     protected virtual void GridCreated()
     {
         SetCoordinates(GridManager.Instance.GetCoordinatesFromWorldPosition(transform.position));
-        GridManager.Instance.PlaceObject(this);
+        if (_parentObject != null)
+        {
+            _parentObject.AttachObject(this);
+        }
+        else
+        {
+            GridManager.Instance.PlaceObject(this);
+        }
     }
 
     #region GridEvents
@@ -197,8 +230,6 @@ public abstract class GridObject : ConfigurableObject
         {
             OnPlaced();
         }
-
-		_isDirty = true;
     }
 
     public virtual void ConfirmPlacement()
@@ -220,8 +251,6 @@ public abstract class GridObject : ConfigurableObject
         {
             OnDetached();
         }
-
-		_isDirty = false;
     }
 
     public virtual void Selected()
@@ -315,4 +344,214 @@ public abstract class GridObject : ConfigurableObject
 	}
 
     public abstract float ConstructionTimeRemaining { get; }
+
+    public GridObject Attachment
+    {
+        get
+        {
+            return _attachment;
+        }
+    }
+
+    public bool IsAttachable
+    {
+        get
+        {
+            return _attachable;
+        }
+    }
+
+    public virtual bool AttachObject(GridObject objectToAttach)
+    {
+        if(Attachment == null && objectToAttach.IsAttachable)
+        {
+            _attachment = objectToAttach;
+            _attachment.AttachToParent(this);
+            _attachment.Placed();
+            return true;
+        }
+        return false;
+    }
+
+    public virtual void AttachToParent(GridObject parent)
+    {
+        _parentObject = parent;
+        transform.SetParent(parent.transform);
+        transform.localPosition = Vector3.zero;
+    }
+
+    public virtual void DetachObject()
+    {
+        if(Attachment != null)
+        {
+            _attachment.DetachFromParent();
+            _attachment.DetachedFromGrid();
+        }
+    }
+
+    public virtual void DetachFromParent()
+    {
+        _parentObject = null;
+    }
+
+    public virtual void FillFromNeighbour(GridObject neighbour)
+    {
+        if (neighbour.Height >= Height || neighbour.IsFlooded)
+        {
+            AddToFillAmount(neighbour.CurrentFillAmount * FillRate * Time.deltaTime);
+        }
+    }
+
+    public virtual void AddToFillAmount(float fillPctAdded)
+    {
+        if (fillPctAdded <= 0) return;
+        if (_currentFill < 1f)
+        {
+            _currentFill = Mathf.Clamp01(_currentFill + fillPctAdded);
+
+            if (_currentFill > 0)
+            {
+                if (_waterPlane != null)
+                {
+                    _waterPlane.SetFill(CurrentFillAmount);
+                }
+            }
+
+            if (_currentFill == 1f)
+            {
+                Flood();
+            }
+        }
+    }
+
+    protected virtual void Flood()
+    {
+        _currentFill = 1f;
+        _isFlooded = true;
+        if (_waterPlane != null)
+        {
+            _waterPlane.SetFill(CurrentFillAmount);
+        }
+        if (Attachment != null)
+        {
+            Attachment.gameObject.SetActive(false);
+        }
+    }
+
+    public virtual void Drain(float amount)
+    {
+        if (CurrentFillAmount > 0)
+        {
+            _currentFill = Mathf.Clamp01(_currentFill - amount);
+
+            if (IsFlooded && CurrentFillAmount <= 0)
+            {
+                Reclaim();
+            }
+        }
+    }
+
+    protected virtual void Reclaim()
+    {
+        _currentFill = 0;
+        if (_waterPlane != null)
+        {
+            _waterPlane.SetFill(CurrentFillAmount);
+        }
+
+        if (IsFlooded)
+        {
+            if (Attachment != null)
+            {
+                Destroy(Attachment.gameObject);
+                DetachObject();
+            }
+            _isFlooded = false;
+        }
+
+    }
+
+    protected virtual void Update()
+    {
+        if (!HasBeenPlaced) return;
+        if (CurrentFillAmount > 0)
+        {
+            if (!BlocksWater || IsFlooded)
+            {
+                GridCell[] neighbours = GridManager.Instance.GetNeighbors(Coordinates);
+                for (int i = 0; i < neighbours.Length; i++)
+                {
+                    if (neighbours[i].IsOccupied)
+                    {
+                        neighbours[i].Occupant.FillFromNeighbour(this);
+                    }
+                }
+            }
+
+            Drain(DrainRate * Time.deltaTime);
+        }
+    }
+
+    public float FillRate
+    {
+        get
+        {
+            if (Attachment != null)
+            {
+                return Attachment.FillRate;
+            }
+            return _fillRate;
+        }
+    }
+
+    public float CurrentFillAmount
+    {
+        get { return _currentFill; }
+    }
+
+    public bool IsFlooded
+    {
+        get { return _isFlooded; }
+    }
+
+    public float Height
+    {
+        get { return _height; }
+    }
+
+    public float DrainRate
+    {
+        get
+        {
+            if (Attachment != null)
+            {
+                return Attachment.DrainRate;
+            }
+            return _drainRate;
+        }
+    }
+
+    public bool BlocksWater
+    {
+        get
+        {
+            if (Attachment != null)
+            {
+                return Attachment.BlocksWater;
+            }
+            return _blockWater;
+        }
+    }
+
+    public bool BlocksPeople
+    {
+        get
+        {
+            if (Attachment != null)
+            {
+                return Attachment.BlocksPeople;
+            }
+            return _blockPeople;
+        }
+    }
 }

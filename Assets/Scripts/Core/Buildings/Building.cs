@@ -15,4 +15,9 @@ public class Building : BaseBuilding
 
     [SerializeField]
     private int _occupants = 0;
+
+    protected override void Update()
+    {
+        base.Update();
+    }
 }
