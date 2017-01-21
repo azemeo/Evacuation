@@ -16,6 +16,9 @@ public class GameManager : SingletonBehavior<GameManager>
 
 	private bool _isGameReady = false;
 
+    [SerializeField]
+    private GameObject _cameraRig;
+
 
     [SerializeField]
     private OutlineEffect _outlineEffect;
@@ -62,6 +65,13 @@ public class GameManager : SingletonBehavior<GameManager>
 	private static int _lineOfSightMask = -1;
 
     #region MONOBEHAVIOR METHODS
+
+    protected override void Init()
+    {
+        base.Init();
+
+        _cameraRig.SetActive(true);
+    }
 
     private void Update()
     {

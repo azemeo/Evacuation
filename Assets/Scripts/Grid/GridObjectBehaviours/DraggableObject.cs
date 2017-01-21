@@ -12,14 +12,6 @@ public class DraggableObject : SelectableObject, IDragHandler, IEndDragHandler, 
     private bool _isPlacing = false;
     private Vector3 _dragOffset;
 
-    void Start()
-    {
-        if (_gridObject == null)
-        {
-            initialize();
-        }
-    }
-
     protected override void initialize()
     {
         base.initialize();

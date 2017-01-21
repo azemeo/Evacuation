@@ -115,7 +115,7 @@ public abstract class BaseBuilding : PurchasableObject {
 
         UIManager.Instance.Get<UIBuildTimersPanel>(UIManager.PanelID.BuildTimersPanel).RemoveTimer(UID + "_build");
 
-		AudioManager.Instance.Play(AudioSFXDatabase.Instance.BuildSFX, AudioManager.AudioGroup.Building_Created);
+		//AudioManager.Instance.Play(AudioSFXDatabase.Instance.BuildSFX, AudioManager.AudioGroup.Building_Created);
     }
 
     #endregion

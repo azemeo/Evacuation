@@ -19,7 +19,7 @@ public class GridManager : SingletonBehavior<GridManager>
 	private GridCell _gridCellPrefab;
 
 	[SerializeField]
-	private int _cellSize = 1;
+	private float _cellSize = 1;
 
     [SerializeField]
     private int _borderWidth = 2;
@@ -67,7 +67,7 @@ public class GridManager : SingletonBehavior<GridManager>
         get { return _activeObject; }
     }
 
-	public int GridCellSize
+	public float GridCellSize
     {
         get
         {
@@ -115,7 +115,7 @@ public class GridManager : SingletonBehavior<GridManager>
         _gridRoot = new GameObject("Root");
         _gridRoot.transform.SetParent(transform, false);
 
-		_grid = GridBuilder.Create(_gridRoot.transform, _gridCellPrefab, sizeX, sizeY, 1, _borderWidth, _borderCellPrefab);
+		_grid = GridBuilder.Create(_gridRoot.transform, _gridCellPrefab, sizeX, sizeY, _cellSize, _borderWidth, _borderCellPrefab);
 		_gridMask = new bool[sizeX, sizeY];
 		_emptyCellsList = new List<GridCell>(sizeX * sizeY);
 

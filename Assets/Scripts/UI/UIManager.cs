@@ -8,43 +8,13 @@ public class UIManager : SingletonBehavior<UIManager>
     public enum PanelID
     {
         NONE = 0,
-        SelectionPanel = 1,
-        TrainableInfoPanel = 2,
-        PlacementPanel = 3,
-        BuildTimersPanel = 4,
-        CalloutsPanel = 5,
-		BarracksSelectionPanel = 6,
-        InfoPanel = 7,
-        UpgradePanel = 8,
-        ResearchPanel = 9,
-        TrainingPanel = 10,
-		GameMessagePanel = 11,
-        ResearchUpgradePanel = 12,
-        ShopPanel = 13,
-        DebugPanel = 14,
-        EditorPanel = 15,
-        EditorSelectionPanel = 16,
-        SpellTrainingPanel = 17,
-        ScenarioPanel = 18,
-        BattleUI = 19,
-        GameUI = 20,
-        BattleCompletePanel = 21,
-        DamageBarsPanel = 22,
-		RaidInProgressPanel = 23,
-        GroupUpgradePanel = 24,
-        EmpirePanel = 25,
-		DialogPanel = 26,
-		DeleteTroopPanel = 27,
-		SettingsPanel = 28,
-		PlayerProfilePanel = 29,
-		PlayerProfileTownHallPanel = 30,
-		TrainableUpgradePanel = 31,
-        MessagePanel = 32,
-		ChatPanel = 33,
-		RunningBattlePanel = 34,
-		PlayerProfileInfoPanel = 35,
-        ReplayUI = 36
-	}
+        PlacementPanel = 1,
+        BuildTimersPanel = 2,
+        DamageBarsPanel = 3,
+        GameMessagePanel = 4
+    }
+
+    public Text CountdownDisplay, WaveStatsDisplay;
 
     [System.Serializable]
     public class UIStateData
@@ -166,4 +136,15 @@ public class UIManager : SingletonBehavior<UIManager>
 			graphics[i].material = isEnabled ? graphics[i].defaultMaterial : _disabledItemMaterial;
 		}
 	}
+
+    void Update()
+    {
+        if (WaveManager.Instance != null)
+        {
+            System.TimeSpan timeToWave = System.TimeSpan.FromSeconds(WaveManager.Instance.NextWaveTime - Time.time);
+            CountdownDisplay.text = string.Format("{0}:{1} until wave {2}", timeToWave.Minutes, timeToWave.Seconds, WaveManager.Instance.NextWave);
+            WaveStatsDisplay.text = string.Format("Height: {0}m   Danger: {1}", WaveManager.Instance.GetWaveHeight(), WaveManager.Instance.GetWaveDanger());
+        }
+    }
+
 }

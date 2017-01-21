@@ -22,7 +22,7 @@ public class SelectableObject : MonoBehaviour, IPointerClickHandler, IScrollHand
         }
     }
 
-    private void Awake()
+    private void Start()
     {
         if (_gridObject == null)
         {

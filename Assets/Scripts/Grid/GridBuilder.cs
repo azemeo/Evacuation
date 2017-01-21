@@ -3,7 +3,7 @@ using System.Collections;
 
 public class GridBuilder : MonoBehaviour {
 
-	public static GridCell[,] Create(Transform gridRoot, GridCell tilePrefab, int width, int height, int tileSize, int borderWidth, GridCell borderTilePrefab)
+	public static GridCell[,] Create(Transform gridRoot, GridCell tilePrefab, int width, int height, float tileSize, int borderWidth, GridCell borderTilePrefab)
 	{
 		if(gridRoot.childCount > 0)
 		{
