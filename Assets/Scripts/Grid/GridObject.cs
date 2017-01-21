@@ -10,7 +10,7 @@ public abstract class GridObject : ConfigurableObject
 
     public abstract int GridObjectType { get; }
 
-    [SerializeField] protected Vector2Int _size = new Vector2Int(2,2);
+    protected Vector2Int _size = new Vector2Int(1,1);
 	[SerializeField] protected int _movementCost = 2;
     [SerializeField] private Transform _uiAnchor;
 	[SerializeField] protected BoxCollider _collider;
