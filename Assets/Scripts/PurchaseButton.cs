@@ -7,11 +7,14 @@ public class PurchaseButton : MonoBehaviour {
 
     Transform popup;
 
+    [SerializeField]
+    private string _templateID;
+
 	// Use this for initialization
 	void Start () {
         popup = transform.FindChild("Popup Panel");
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 
@@ -31,6 +34,15 @@ public class PurchaseButton : MonoBehaviour {
 
     public void Buy(string itemName)
     {
-        print("Purchased" + itemName);
+
+
+        if (BuildingCreator.Instance.CreateBuilding(_templateID))
+        {
+            print("Purchased" + itemName);
+        }
+        else
+        {
+            GameManager.Instance.ShowMessage("Not enough Cash!");
+        }
     }
 }

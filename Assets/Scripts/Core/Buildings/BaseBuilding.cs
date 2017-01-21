@@ -6,6 +6,7 @@ using Helpers;
 
 public abstract class BaseBuilding : PurchasableObject {
     #region Class Data Structures
+    [Serializable]
     public struct BuildingLevel
     {
         public int MaxHitPoints;      // maximum number of HP for this structure at this level

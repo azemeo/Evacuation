@@ -139,35 +139,25 @@ public class GridManager : SingletonBehavior<GridManager>
     /// </summary>
     /// <returns><c>true</c>, if bounds were clear for placement, <c>false</c> otherwise.</returns>
     /// <param name="gridObject">The GridObject to check.</param>
-    public bool CanBePlaced(GridObject gridObject, bool allowOnBorder = false)
+    public bool CanBePlaced(GridObject gridObject)
 	{
         Vector2Int coords = GetGridCoordinates(gridObject.transform.position);
-        Vector2Int size = gridObject.Size;
 
-		return CanBePlaced(coords, size);
-	}
-
-	public bool CanBePlaced(Vector2Int coords, Vector2Int size, bool allowOnBorder = false)
-	{
-		for (int x = coords.x; x < coords.x + size.x; x++)
-		{
-			for (int y = coords.y; y < coords.y + size.y; y++)
-			{
-				if (IsPointWithinBounds(x, y))
-				{
-					if (_grid[x, y].IsOccupied)
-					{
-						return false;
-					}
-				}
-				else
-				{
-					return false;
-				}
-			}
-		}
-
-		return true;
+        if (IsPointWithinBounds(coords.x, coords.y))
+        {
+            if (_grid[coords.x, coords.y].IsOccupied)
+            {
+                if(gridObject.IsAttachable)
+                {
+                    if(_grid[coords.x, coords.y].Occupant.Attachment == null || _grid[coords.x, coords.y].Occupant.Attachment == gridObject)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+        return false;
 	}
 
     /// <summary>
@@ -177,17 +167,10 @@ public class GridManager : SingletonBehavior<GridManager>
 	public void VisualizePlacement(GridObject gridObject)
 	{
         Vector2Int coords = GetGridCoordinates(gridObject.transform.position);
-        Vector2Int size = gridObject.Size;
 
-		for (int x = coords.x; x < coords.x + size.x; x++)
+		if (IsPointWithinBounds(coords.x, coords.y))
         {
-			for (int y = coords.y; y < coords.y + size.y; y++)
-            {
-				if (IsPointWithinBounds(x, y))
-                {
-					_grid[x, y].Select();
-                }
-            }
+			_grid[coords.x, coords.y].Select();
         }
 	}
 
@@ -198,17 +181,10 @@ public class GridManager : SingletonBehavior<GridManager>
 	public void ClearVisualization(GridObject gridObject)
 	{
         Vector2Int coords = GetGridCoordinates(gridObject.transform.position);
-        Vector2Int size = gridObject.Size;
 
-		for (int x = coords.x; x < coords.x + size.x; x++)
+		if (IsPointWithinBounds(coords.x, coords.y))
         {
-			for (int y = coords.y; y < coords.y + size.y; y++)
-            {
-				if (IsPointWithinBounds(x, y))
-                {
-					_grid[x, y].Deselect();
-                }
-            }
+			_grid[coords.x, coords.y].Deselect();
         }
     }
 
@@ -219,21 +195,23 @@ public class GridManager : SingletonBehavior<GridManager>
 	public void PlaceObject(GridObject gridObject)
 	{
         Vector2Int coords = gridObject.Coordinates;
-        Vector2Int size = gridObject.Size;
+
+        if (!IsPointWithinBounds(coords.x, coords.y))
+        {
+            return;
+        }
+
+        if (_grid[coords.x, coords.y].IsOccupied)
+        {
+            _grid[coords.x, coords.y].Occupant.AttachObject(gridObject);
+            return;
+        }
 
 		gridObject.transform.parent = _grid[coords.x, coords.y].transform;
 
-		for (int x = coords.x; x < coords.x + size.x; x++)
-        {
-			for (int y = coords.y; y < coords.y + size.y; y++)
-            {
-				if (IsPointWithinBounds(x, y))
-                {
-					_grid[x, y].SetOccupant(gridObject);
-					_emptyCellsList.Remove(_grid[x, y]);
-                }
-            }
-        }
+		_grid[coords.x, coords.y].SetOccupant(gridObject);
+		_emptyCellsList.Remove(_grid[coords.x, coords.y]);
+
         gridObject.Placed();
 
 		if (!_allObjects.ContainsKey(gridObject.UID))
@@ -252,25 +230,24 @@ public class GridManager : SingletonBehavior<GridManager>
 	public void DetachObject(GridObject gridObject, bool updateParent = true)
     {
         Vector2Int coords = gridObject.Coordinates;
-        Vector2Int size = gridObject.Size;
 
         if (updateParent)
         {
             gridObject.transform.parent = transform;
         }
 
+        if (_grid[coords.x, coords.y].IsOccupied && _grid[coords.x, coords.y].Occupant.Attachment == gridObject)
+        {
+            _grid[coords.x, coords.y].Occupant.DetachObject();
+            return;
+        }
+
         gridObject.DetachedFromGrid();
 
-		for (int x = coords.x; x < coords.x + size.x; x++)
+		if (IsPointWithinBounds(coords.x, coords.y))
         {
-			for (int y = coords.y; y < coords.y + size.y; y++)
-            {
-				if (IsPointWithinBounds(x, y))
-                {
-					_grid[x, y].Reset();
-					_emptyCellsList.Add(_grid[x, y]);
-                }
-            }
+			_grid[coords.x, coords.y].Reset();
+			_emptyCellsList.Add(_grid[coords.x, coords.y]);
         }
     }
 
@@ -347,18 +324,12 @@ public class GridManager : SingletonBehavior<GridManager>
 	/// </summary>
 	/// <param name="coords">Top left coordinates.</param>
 	/// <param name="size">Size.</param>
-	public void ShowMaskAtCoords(Vector2Int coords, Vector2Int size)
+	public void ShowMaskAtCoords(Vector2Int coords)
 	{
-		for (int x = coords.x - 1; x < coords.x + size.x + 1; x++)
+		if (IsPointWithinBounds(coords.x, coords.y))
 		{
-			for (int y = coords.y - 1; y < coords.y + size.y + 1; y++)
-			{
-				if (IsPointWithinBounds(x, y))
-				{
-					_gridMask[x, y] = true;
-					_grid[x, y].ShowMask();
-				}
-			}
+			_gridMask[coords.x, coords.y] = true;
+			_grid[coords.x, coords.y].ShowMask();
 		}
 	}
 
@@ -395,9 +366,8 @@ public class GridManager : SingletonBehavior<GridManager>
 			//	continue;
 
 			Vector2Int coords = gridObject.Coordinates;
-			Vector2Int size = gridObject.Size;
 
-			ShowMaskAtCoords(coords, size);
+			ShowMaskAtCoords(coords);
 		}
 	}
     #endregion

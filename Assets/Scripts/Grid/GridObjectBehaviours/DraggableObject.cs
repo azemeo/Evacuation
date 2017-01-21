@@ -12,6 +12,14 @@ public class DraggableObject : SelectableObject, IDragHandler, IEndDragHandler, 
     private bool _isPlacing = false;
     private Vector3 _dragOffset;
 
+    private void Awake()
+    {
+        if(_gridObject == null && GameManager.Instance != null)
+        {
+            initialize();
+        }
+    }
+
     protected override void initialize()
     {
         base.initialize();
@@ -123,8 +131,9 @@ public class DraggableObject : SelectableObject, IDragHandler, IEndDragHandler, 
             {
                 if (newCell != currentCell)     //If we are still in the same cell, no need to update
                 {
+                    Vector2Int coords = GridManager.Instance.GetGridCoordinates(point);
                     //finally, make sure the objects size doesn't make it stretch out of bounds
-                    if (GridManager.Instance.IsRectWithinBounds(GridManager.Instance.GetGridCoordinates(point), _gridObject.Size))
+                    if (GridManager.Instance.IsPointWithinBounds(coords.x, coords.y))
                     {
                         ClearVisualization();
                         SetPosition(newCell.transform.position);

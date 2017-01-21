@@ -10,7 +10,6 @@ public abstract class GridObject : ConfigurableObject
 
     public abstract int GridObjectType { get; }
 
-    protected Vector2Int _size = new Vector2Int(1,1);
 	[SerializeField] protected int _movementCost = 2;
     [SerializeField] private Transform _uiAnchor;
 	[SerializeField] protected BoxCollider _collider;
@@ -51,6 +50,9 @@ public abstract class GridObject : ConfigurableObject
     protected float _drainRate = 0.05f;
 
     [SerializeField]
+    protected float _reclaimThreshold = 0.1f;
+
+    [SerializeField]
     protected float _currentFill = 0;
     [SerializeField]
     protected float _height = 0;
@@ -88,12 +90,6 @@ public abstract class GridObject : ConfigurableObject
 		{
 			_name = value;
 		}
-	}
-
-	public Vector2Int Size
-	{
-		get { return _size; }
-		set { _size = value; }
 	}
 
 	public Vector2Int Coordinates
@@ -181,12 +177,9 @@ public abstract class GridObject : ConfigurableObject
 
 	public override void OnSpawned()
     {
-		Vector3 localPosition = new Vector3((_size.x * 0.5f) - 0.5f, 0.5f, (_size.y * 0.5f) - 0.5f);
-
-		_collider.transform.localPosition = localPosition;
 		_collider.transform.localScale = Vector3.one;
 		_collider.center = Vector3.zero;
-		_collider.size = new Vector3(_size.x, 1, _size.y);
+		_collider.size = new Vector3(1, 1, 1);
     }
 
 	public override void OnDespawned()
@@ -337,10 +330,14 @@ public abstract class GridObject : ConfigurableObject
 	/// <returns></returns>
 	public Vector3 GetRandomPositionInArea()
 	{
+        Vector3 min = transform.position;
+        min.x -= 0.4f;
+        min.z -= 0.4f;
+
 		Vector3 max = transform.position;
-		max.x += (Size.x - 1) * GridManager.Instance.GridCellSize;
-		max.z += (Size.y - 1) * GridManager.Instance.GridCellSize;
-		return new Vector3(Random.Range(transform.position.x, max.x), transform.position.y, Random.Range(transform.position.z, max.z));
+        max.x += 0.4f;
+        max.z += 0.4f;
+		return new Vector3(Random.Range(min.x, max.x), transform.position.y, Random.Range(min.z, max.z));
 	}
 
     public abstract float ConstructionTimeRemaining { get; }
@@ -358,6 +355,14 @@ public abstract class GridObject : ConfigurableObject
         get
         {
             return _attachable;
+        }
+    }
+
+    public GridObject ParentObject
+    {
+        get
+        {
+            return _parentObject;
         }
     }
 
@@ -386,6 +391,7 @@ public abstract class GridObject : ConfigurableObject
         {
             _attachment.DetachFromParent();
             _attachment.DetachedFromGrid();
+            _attachment = null;
         }
     }
 
@@ -444,7 +450,7 @@ public abstract class GridObject : ConfigurableObject
         {
             _currentFill = Mathf.Clamp01(_currentFill - amount);
 
-            if (IsFlooded && CurrentFillAmount <= 0)
+            if (IsFlooded && CurrentFillAmount <= _reclaimThreshold)
             {
                 Reclaim();
             }

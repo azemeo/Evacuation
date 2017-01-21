@@ -17,9 +17,9 @@ public class UIPlacementPanel : UIPanel {
 
         _selectedObject = selected;
 
-        float offset = Mathf.Max(_selectedObject.Size.x, _selectedObject.Size.y) * GridManager.Instance.GridCellSize;
+        //float offset = GridManager.Instance.GridCellSize;
         //Debug.Log(offset);
-        transform.localPosition = new Vector3(0, 0, -offset);
+        //transform.localPosition = new Vector3(0, 0, -offset);
 
 
         gameObject.SetActive(true);
