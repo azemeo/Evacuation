@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Pathfinding;
 
 public class AIMoveAction : AIState {
 
@@ -12,6 +13,7 @@ public class AIMoveAction : AIState {
 		}
 	}
 
+    private Vector3 _dest;
 	protected Vector3[] _waypoints;
 	protected int _currentWaypointIndex;
 
@@ -20,11 +22,17 @@ public class AIMoveAction : AIState {
     protected AIAgent _cachedAgent;
     protected Vector3 _facingDirection = Vector3.forward;
     protected Quaternion _lookRotation = Quaternion.LookRotation(Vector3.forward);
+    private bool _usePathfinder = true;
 
     protected AIMoveAction() {}
 
-	public AIMoveAction(Vector3 destination, float normalizedSpeed, string tag = "") : this (new Vector3[1] {destination}, normalizedSpeed, tag)
-    {}
+	public AIMoveAction(Vector3 destination, float normalizedSpeed, string tag = "", bool usePathfinder = true)
+    {
+        _dest = destination;
+        _usePathfinder = usePathfinder;
+        _normalizedSpeed = normalizedSpeed;
+        _tag = tag;
+    }
 
 	public AIMoveAction(Vector3[] waypoints, float normalizedSpeed, string tag = "")
 	{
@@ -40,9 +48,25 @@ public class AIMoveAction : AIState {
 		_cachedAgent.CurrentSpeed = _cachedAgent.MovementSpeed * _normalizedSpeed; // Mathf.Lerp(_currentSpeed, _cachedAgent.MovementSpeed * _normalizedSpeed, 0.1f);
         Agent.SetAnimationFloat("Velocity", 1f);
         Agent.SetAnimationSpeed(_normalizedSpeed);
+        if(_usePathfinder)
+        {
+            Pathfinder.Instance.FindPath(Agent.GetHashCode(), Agent.transform.position, _dest, PathFound);
+        }
     }
 
-	public override void ExitState ()
+    private void PathFound(bool success, PathData pathData)
+    {
+        if (success)
+        {
+            _waypoints = pathData.waypoints;
+        }
+        else
+        {
+            _waypoints = new Vector3[] { _dest };
+        }
+    }
+
+    public override void ExitState ()
 	{
 		base.ExitState ();
 		_cachedAgent.CurrentSpeed = 0;
@@ -51,6 +75,8 @@ public class AIMoveAction : AIState {
     public override void Run()
     {
         base.Run();
+
+        if (_waypoints == null) return;
 
         if (_cachedAgent.MovementSpeed == 0)
         {
