@@ -357,7 +357,7 @@ public class GameManager : SingletonBehavior<GameManager>
             if (spawnRoad == null) break;
 
             spawnRoad.AddCivilians(randAmount);
-            CiviliansRemaining += _totalSpawns;
+            CiviliansRemaining += randAmount;
             _totalSpawns -= randAmount;
             allRoads.Remove(spawnRoad);
         }
