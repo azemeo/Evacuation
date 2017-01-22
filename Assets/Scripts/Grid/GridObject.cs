@@ -511,7 +511,7 @@ public abstract class GridObject : ConfigurableObject
         }
     }
 
-    public float FillRate
+    public virtual float FillRate
     {
         get
         {
@@ -519,6 +519,14 @@ public abstract class GridObject : ConfigurableObject
             {
                 return Attachment.FillRate;
             }
+            return _fillRate;
+        }
+    }
+
+    public float LocalFillRate
+    {
+        get
+        {
             return _fillRate;
         }
     }
@@ -538,7 +546,7 @@ public abstract class GridObject : ConfigurableObject
         get { return _height; }
     }
 
-    public float DrainRate
+    public virtual float DrainRate
     {
         get
         {
@@ -546,6 +554,14 @@ public abstract class GridObject : ConfigurableObject
             {
                 return Attachment.DrainRate;
             }
+            return _drainRate;
+        }
+    }
+
+    public float LocalDrainRate
+    {
+        get
+        {
             return _drainRate;
         }
     }
