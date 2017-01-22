@@ -37,7 +37,7 @@ public class Marshal : AIAgent
                 _targetRoad.Collect(this);
                 _targetSafeZone = GameManager.Instance.FindNearestSafeZone(transform.position);
                 _nextMoveTag = "dropoff";
-                SetState(new AIMoveAction(_targetSafeZone.transform.position, 0.5f));
+                SetState(new AIMoveAction(_targetSafeZone.transform.position, 0.25f));
             }
             else if (_nextMoveTag == "dropoff")
             {

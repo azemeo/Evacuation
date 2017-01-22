@@ -19,6 +19,10 @@ public class UIManager : SingletonBehavior<UIManager>
     public Text AvailableBuildersDisplay;
     public Text AvailableMarshalsDisplay;
 
+    public GameObject GameOverScreen;
+
+    public Text SavedCount;
+
     [System.Serializable]
     public class UIStateData
     {
@@ -27,7 +31,7 @@ public class UIManager : SingletonBehavior<UIManager>
 
         public void SetActive(bool value)
         {
-            for(int i = 0; i < ActiveObjects.Length; i++)
+            for (int i = 0; i < ActiveObjects.Length; i++)
             {
                 ActiveObjects[i].SetActive(value);
             }
@@ -37,19 +41,19 @@ public class UIManager : SingletonBehavior<UIManager>
     [SerializeField]
     private UIStateData[] GameStates;
 
-	[SerializeField]
-	private Material _disabledItemMaterial;
+    [SerializeField]
+    private Material _disabledItemMaterial;
 
     private Dictionary<PanelID, UIPanel> _registeredPanels = new Dictionary<PanelID, UIPanel>();
-	private Dictionary<int, UIStateData> _states = new Dictionary<int, UIStateData>();
-	int _currentUIState = FSMStateTypes.Game.EMPTY;
+    private Dictionary<int, UIStateData> _states = new Dictionary<int, UIStateData>();
+    int _currentUIState = FSMStateTypes.Game.EMPTY;
 
     protected override void Init()
     {
         base.Init();
 
         //auto register everything under the UI manager
-        foreach(UIPanel panel in GetComponentsInChildren<UIPanel>(true))
+        foreach (UIPanel panel in GetComponentsInChildren<UIPanel>(true))
         {
             if (!IsRegistered(panel))
             {
@@ -68,7 +72,7 @@ public class UIManager : SingletonBehavior<UIManager>
         if (_states.ContainsKey(GameStateManager.Instance.CurrentStateType))
         {
             //kick off the initial update, since the state change has already happened
-			gameStateChanged(GameStateManager.Instance.PreviousStateType, GameStateManager.Instance.CurrentStateType);
+            gameStateChanged(GameStateManager.Instance.PreviousStateType, GameStateManager.Instance.CurrentStateType);
         }
     }
 
@@ -88,7 +92,7 @@ public class UIManager : SingletonBehavior<UIManager>
                 _states[_currentUIState].SetActive(false);
             }
 
-			_currentUIState = newStateType;
+            _currentUIState = newStateType;
             _states[_currentUIState].SetActive(true);
         }
     }
@@ -130,15 +134,15 @@ public class UIManager : SingletonBehavior<UIManager>
         return null;
     }
 
-	public void SetItemEnabled(GameObject itemObject, bool isEnabled)
-	{
-		Graphic[] graphics = itemObject.GetComponentsInChildren<Graphic>();
+    public void SetItemEnabled(GameObject itemObject, bool isEnabled)
+    {
+        Graphic[] graphics = itemObject.GetComponentsInChildren<Graphic>();
 
-		for(int i = 0; i < graphics.Length; ++i)
-		{
-			graphics[i].material = isEnabled ? graphics[i].defaultMaterial : _disabledItemMaterial;
-		}
-	}
+        for (int i = 0; i < graphics.Length; ++i)
+        {
+            graphics[i].material = isEnabled ? graphics[i].defaultMaterial : _disabledItemMaterial;
+        }
+    }
 
     void Update()
     {
@@ -154,13 +158,24 @@ public class UIManager : SingletonBehavior<UIManager>
             {
                 CountdownDisplay.text = "Wave Arrived!";
             }
-         }
+        }
 
         if (AvailableBuildersDisplay != null && AvailableMarshalsDisplay != null)
         {
             AvailableBuildersDisplay.text = string.Format("{0}/{1}", GameManager.Instance.AvailableBuilders, GameManager.Instance.TotalBuilders);
             AvailableMarshalsDisplay.text = string.Format("{0}/{1}", GameManager.Instance.AvailableMarshals, GameManager.Instance.TotalMarshals);
         }
+    }
+
+    public void ShowGameOver()
+    {
+        SavedCount.text = "You Saved " + GameManager.Instance._rescued.ToString() + " civilians.";
+        GameOverScreen.SetActive(true);
+    }
+
+    public void GoToMenu()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
     }
 
 }

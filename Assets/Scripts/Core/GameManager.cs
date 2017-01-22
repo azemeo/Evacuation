@@ -36,6 +36,9 @@ public class GameManager : SingletonBehavior<GameManager>
         get { return _headquarters; }
     }
 
+    public int CiviliansRemaining = 0;
+    public int _rescued = 0;
+
     [SerializeField]
     private GameObject _cameraRig;
 
@@ -354,6 +357,7 @@ public class GameManager : SingletonBehavior<GameManager>
             if (spawnRoad == null) break;
 
             spawnRoad.AddCivilians(randAmount);
+            CiviliansRemaining += _totalSpawns;
             _totalSpawns -= randAmount;
             allRoads.Remove(spawnRoad);
         }
@@ -369,6 +373,21 @@ public class GameManager : SingletonBehavior<GameManager>
         WaveManager.Instance.StartNextWaveCountdown();
 
         AudioManager.Instance.PlayBuildMusic();
+    }
+
+    public void RemoveCivilian(bool rescued)
+    {
+        CiviliansRemaining--;
+        if (rescued) _rescued++;
+        if(CiviliansRemaining == 0)
+        {
+            EndGame();
+        }
+    }
+
+    public void EndGame()
+    {
+        UIManager.Instance.ShowGameOver();
     }
 
     public GameObject FindNearestSafeZone(Vector3 position)

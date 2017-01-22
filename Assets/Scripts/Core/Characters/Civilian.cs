@@ -79,6 +79,7 @@ public class Civilian : AIAgent {
             }
             else
             {
+                GameManager.Instance.RemoveCivilian(true);
                 Destroy(gameObject);
             }
         }
@@ -153,9 +154,11 @@ public class Civilian : AIAgent {
         {
             _spawnPoint.CivilianKilled(this);
         }
-        GameManager.Instance.ShowMessage(Name + " has died! :'(");
+        GameManager.Instance.ShowMessage(Name + " has died!");
 
         Destroy(gameObject);
+
+        GameManager.Instance.RemoveCivilian(false);
         //DamageBarPanel.AddDamageBar(this, UIAnchor, Vector3.up * 2);
 
         //AudioManager.Instance.Play(AudioSFXDatabase.Instance.BuildingDestroyedSFX, AudioManager.AudioGroup.Building_Destroyed);
