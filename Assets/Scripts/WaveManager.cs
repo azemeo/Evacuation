@@ -46,6 +46,7 @@ public class WaveManager : SingletonBehavior<WaveManager> {
         {
             onWaveApproach();
             GameManager.Instance.ShowMessage("WARNING! Huge Wave Approaching!");
+            AudioManager.Instance.Play(AudioManager.Instance._siren, AudioManager.AudioGroup.Other, fadeInTime:7f, volume:0.7f);
         }
     }
 
@@ -55,14 +56,19 @@ public class WaveManager : SingletonBehavior<WaveManager> {
         TimerManager.Instance.StartTimerNow("big_wave_warning", NextWaveTime-WaveWarningTme);
     }
 
+    IEnumerator waveDelay()
+    {
+        yield return new WaitForSeconds(2f);
+        onWaveArrival();
+        NextWave++;
+        WaveDanger += 0.5f;
+    }
+
     public void TriggerWave()
     {
         if (TimerManager.Instance.IsTimerRunning("big_wave_arrive")) TimerManager.Instance.CancelTimer("big_wave_arrive");
         if (TimerManager.Instance.IsTimerRunning("big_wave_warning")) TimerManager.Instance.CancelTimer("big_wave_warning");
         if (TimerManager.Instance.IsTimerRunning("big_wave_recede")) TimerManager.Instance.CancelTimer("big_wave_recede");
-        NextWave++;
-        WaveDanger += 0.5f;
-        onWaveArrival();
-
+        Job.Create(waveDelay());
     }
 }

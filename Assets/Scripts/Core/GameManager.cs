@@ -367,6 +367,8 @@ public class GameManager : SingletonBehavior<GameManager>
         m.SetHome(HQ);
 
         WaveManager.Instance.StartNextWaveCountdown();
+
+        AudioManager.Instance.PlayBuildMusic();
     }
 
     public GameObject FindNearestSafeZone(Vector3 position)

@@ -8,8 +8,7 @@ public class AudioManager : SingletonBehavior<AudioManager> {
 	{
 		BGM_Music,
 		UI,
-        Building_Created,
-        Building_Destroyed
+        Other
     }
 
 	public bool IsMusicMute
@@ -37,15 +36,23 @@ public class AudioManager : SingletonBehavior<AudioManager> {
 	}
 
 	[SerializeField]
-	private AudioClip _campMusic;
+	private AudioClip _buildMusic;
 
-	[SerializeField]
-	private AudioClip _battleMusic;
+	public AudioClip _siren;
 
-	[SerializeField]
+    [SerializeField]
+    private AudioClip _waveMusic;
+
+    [SerializeField]
+    private AudioClip _waveSound;
+
+    [SerializeField]
+    private AudioClip _waveapproach;
+
+    [SerializeField]
 	private AudioClip _buttonSFX;
 
-	[SerializeField]
+    [SerializeField]
 	private AudioSFX _audioSFXPrefab;
 
 	private Dictionary<AudioGroup, List<AudioSFX>> _sfxsDictionary = new Dictionary<AudioGroup, List<AudioSFX>>();
@@ -56,7 +63,10 @@ public class AudioManager : SingletonBehavior<AudioManager> {
 	private bool _isMusicMute;
 	private bool _isSFXMute;
 
-	private float _musicVolume = 1.0f;
+    int _waveindex;
+    int _bgmIndex;
+
+    private float _musicVolume = 1.0f;
 	private AudioSource _audiosource;
 	private Transform _sfxPoolTransform;
 
@@ -68,6 +78,9 @@ public class AudioManager : SingletonBehavior<AudioManager> {
 		_sfxPoolTransform.parent = transform;
 
 	    ConfigureAudio();
+        WaveManager.onWaveArrival += WaveArrived;
+        WaveManager.onWaveApproach += waveApproach;
+        WaveManager.onWaveRecede += WaveRecede;
 	}
 
 	void ConfigureAudio ()
@@ -78,8 +91,32 @@ public class AudioManager : SingletonBehavior<AudioManager> {
         _sfxsLimit.Add(AudioGroup.UI, 2);
         _sfxsDictionary.Add(AudioGroup.UI, new List<AudioSFX>());
 
-        _sfxsLimit.Add(AudioGroup.Building_Created, 2);
-        _sfxsDictionary.Add(AudioGroup.Building_Created, new List<AudioSFX>());
+        _sfxsLimit.Add(AudioGroup.Other, 10);
+        _sfxsDictionary.Add(AudioGroup.Other, new List<AudioSFX>());
+    }
+
+    void WaveArrived()
+    {
+        Stop(AudioGroup.BGM_Music, _bgmIndex, 2f);
+        Play(_waveSound, AudioGroup.Other);
+        PlayWaveMusic();
+    }
+
+    void WaveRecede()
+    {
+        Job.Create(recede());
+    }
+
+    IEnumerator recede()
+    {
+        fadeOutWave();
+        yield return new WaitForSeconds(5f);
+        PlayBuildMusic(fadeInTime: 5f);
+    }
+
+    void waveApproach()
+    {
+        Play(_waveapproach, AudioGroup.Other);
     }
 
 	public void Play(AudioSource source, AudioClip clip, AudioGroup audioGroup, float fadeInTime = 0, float volume = 1, float pitch = 1, bool loop = false, string tag = "")
@@ -185,29 +222,20 @@ public class AudioManager : SingletonBehavior<AudioManager> {
 		Job.Create(ChangeVolume(fadeTime));
 	}
 
-	public void PlayCampMusic(float fadeInTime = 1, float fadeOutTime = 1)
+	public void PlayBuildMusic(float fadeInTime = 1, float fadeOutTime = 1)
 	{
-		if((_audiosource.clip != null && _audiosource.clip.Equals(_campMusic)) || _isMusicMute)
-			return;
-
-		_audiosource.loop = true;
-
-		if(_crossFadeMusicJob != null)
-			_crossFadeMusicJob.Kill();
-
-		_crossFadeMusicJob = Job.Create(CrossFadeMusic(_campMusic, fadeInTime, fadeOutTime));
+        _bgmIndex = Play(_buildMusic, AudioGroup.UI, 2f);
 	}
 
-	public void PlayBattleMusic(float fadeInTime = 1, float fadeOutTime = 1)
+	public void PlayWaveMusic(float fadeInTime = 1, float fadeOutTime = 1)
 	{
-		if((_audiosource.clip != null && _audiosource.clip.Equals(_battleMusic)) || _isMusicMute)
-			return;
-
-		if(_crossFadeMusicJob != null)
-			_crossFadeMusicJob.Kill();
-
-		_crossFadeMusicJob = Job.Create(CrossFadeMusic(_battleMusic, fadeInTime, fadeOutTime));
+        _waveindex = Play(_waveMusic, AudioGroup.BGM_Music, 2f);
 	}
+
+    public void fadeOutWave()
+    {
+        Stop(AudioGroup.BGM_Music, _waveindex, 5f);
+    }
 
 	public void StopCurrentMusic(float fadeOutTime = 1)
 	{
@@ -323,7 +351,7 @@ public class AudioManager : SingletonBehavior<AudioManager> {
 		}
 		else
 		{
-			PlayCampMusic();
+			//PlayCampMusic();
 		}
 	}
 
