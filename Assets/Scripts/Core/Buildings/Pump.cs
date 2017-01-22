@@ -28,4 +28,27 @@ public class Pump : BaseBuilding
         }
         ParentObject.Drain(DrainRate * Time.deltaTime);
     }
+
+    public override float DrainRate
+    {
+        get
+        {
+            if(IsBuilding && ParentObject != null)
+            {
+                return ParentObject.LocalDrainRate;
+            }
+            return base.DrainRate;
+        }
+    }
+    public override float FillRate
+    {
+        get
+        {
+            if (IsBuilding && ParentObject != null)
+            {
+                return ParentObject.LocalFillRate;
+            }
+            return base.FillRate;
+        }
+    }
 }
