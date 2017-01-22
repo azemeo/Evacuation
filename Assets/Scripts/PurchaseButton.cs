@@ -10,7 +10,7 @@ public class PurchaseButton : MonoBehaviour {
     [SerializeField]
     private string _templateID;
 
-	// Use this for initialization
+    // Use this for initialization
 	void Start () {
         popup = transform.FindChild("Popup Panel");
 	}
