@@ -18,6 +18,7 @@ public class UIManager : SingletonBehavior<UIManager>
     public Text CashDisplay;
     public Text AvailableBuildersDisplay;
     public Text AvailableMarshalsDisplay;
+    public Text CivvieCount;
 
     public GameObject GameOverScreen;
 
@@ -164,6 +165,11 @@ public class UIManager : SingletonBehavior<UIManager>
         {
             AvailableBuildersDisplay.text = string.Format("{0}/{1}", GameManager.Instance.AvailableBuilders, GameManager.Instance.TotalBuilders);
             AvailableMarshalsDisplay.text = string.Format("{0}/{1}", GameManager.Instance.AvailableMarshals, GameManager.Instance.TotalMarshals);
+        }
+
+        if (CivvieCount != null)
+        {
+            CivvieCount.text = GameManager.Instance.CiviliansRemaining.ToString();
         }
     }
 
