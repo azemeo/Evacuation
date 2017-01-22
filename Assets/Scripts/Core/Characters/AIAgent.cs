@@ -95,12 +95,12 @@ public abstract class AIAgent : ConfigurableObject {
             _fsm.Update();
 
         GridCell currentCell = GridManager.Instance.GetCell(GridManager.Instance.GetCoordinatesFromWorldPosition(transform.position));
-        if (currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount >= 0.8f && !_swimming)
+        if (currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount >= 0.6f && !_swimming)
         {
             _swimming = true;
             SetAnimationBool("Swim", true);
         }
-        else if (_swimming && currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount < 0.8f)
+        else if (_swimming && currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount < 0.6f)
         {
             _swimming = false;
             SetAnimationBool("Swim", false);
@@ -234,7 +234,7 @@ public abstract class AIAgent : ConfigurableObject {
         min.x -= 0.4f;
         min.z -= 0.4f;
 
-        SetState(new AIWanderState(new Rect(min.x, min.z, 1, 1)));
+        SetState(new AIWanderState(new Rect(min.x, min.z, 0.8f, 0.8f)));
     }
 
     //Convienience methods for setting animator properties

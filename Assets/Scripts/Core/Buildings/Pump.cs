@@ -14,6 +14,8 @@ public class Pump : BaseBuilding
         }
     }
 
+    [SerializeField]
+    private float _drainMultiplier;
     protected override void Update()
     {
         if (!HasBeenPlaced || ParentObject == null || IsBuilding) return;
@@ -23,10 +25,10 @@ public class Pump : BaseBuilding
         {
             if (neighbours[i].IsOccupied)
             {
-                neighbours[i].Occupant.Drain(DrainRate * Time.deltaTime);
+                neighbours[i].Occupant.Drain(neighbours[i].Occupant.DrainRate * (_drainMultiplier - 1) * Time.deltaTime);
             }
         }
-        ParentObject.Drain(DrainRate * Time.deltaTime);
+        ParentObject.Drain(DrainRate * (_drainMultiplier - 1) * Time.deltaTime);
     }
 
     public override float DrainRate

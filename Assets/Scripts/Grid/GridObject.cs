@@ -16,6 +16,8 @@ public abstract class GridObject : ConfigurableObject
 
 	protected Vector2Int _coordinates;
 
+    private bool _hasHadWave = false;
+
     [SerializeField]
     private bool _isSelectable = false;
     private bool _hasBeenPlaced = false;
@@ -203,11 +205,13 @@ public abstract class GridObject : ConfigurableObject
     protected virtual void OnEnable()
     {
         GridManager.OnGridCreated += GridCreated;
+        WaveManager.onWaveRecede += ResetTsunami;
     }
 
     protected virtual void OnDisable()
     {
         GridManager.OnGridCreated -= GridCreated;
+        WaveManager.onWaveRecede -= ResetTsunami;
     }
 
     protected virtual void GridCreated()
@@ -453,8 +457,16 @@ public abstract class GridObject : ConfigurableObject
         }
         if (Attachment != null)
         {
-            Attachment.gameObject.SetActive(false);
+            Attachment.Flood();
+            Attachment.Die();
         }
+
+        ReturnBuilder();
+    }
+
+    protected virtual void Die()
+    {
+        gameObject.SetActive(false);
     }
 
     public virtual void Drain(float amount)
@@ -488,6 +500,41 @@ public abstract class GridObject : ConfigurableObject
             _isFlooded = false;
         }
 
+    }
+
+    public virtual void Tsunami()
+    {
+        if(IsFlooded)
+        {
+            if (_hasHadWave) return;
+
+            new Job(PropegateWave());
+        }
+        else
+        {
+            Flood();
+        }
+        _hasHadWave = true;
+    }
+
+    private IEnumerator PropegateWave()
+    {
+        PoolBoss.Spawn(GameManager.Instance.TsunamiFX.transform, transform.position, Quaternion.identity, null, true);
+        WaveManager.Instance.ResetRecedeTimer();
+        yield return new WaitForSeconds(0.8f);
+        GridCell[] neighbours = GridManager.Instance.GetNeighbors(Coordinates);
+        for (int i = 0; i < neighbours.Length; i++)
+        {
+            if (neighbours[i].IsOccupied)
+            {
+                neighbours[i].Occupant.Tsunami();
+            }
+        }
+    }
+
+    private void ResetTsunami()
+    {
+        _hasHadWave = false;
     }
 
     protected virtual void Update()

@@ -12,7 +12,7 @@ public static class Toolbox {
         {
             int d = Mathf.FloorToInt(seconds / 86400);
             seconds -= (d * 86400);
-            timeString += d.ToString() + "d";
+            timeString += d.ToString() + ":";
 
             if (seconds == 0)
                 return timeString;
@@ -21,7 +21,7 @@ public static class Toolbox {
         {
             int h = Mathf.FloorToInt(seconds / 3600);
             seconds -= (h * 3600);
-            timeString += h.ToString() + "h";
+            timeString += h.ToString("00") + ":";
 
             if (seconds == 0)
                 return timeString;
@@ -31,12 +31,16 @@ public static class Toolbox {
         {
             int m = Mathf.FloorToInt(seconds / 60);
             seconds -= (m * 60);
-            timeString += m.ToString() + "m";
+            timeString += m.ToString() + ":";
             if (seconds == 0)
                 return timeString;
         }
+        else
+        {
+            timeString += "0:";
+        }
 
-        timeString += seconds.ToString() + "s";
+        timeString += seconds.ToString("00");
 
         return timeString;
     }

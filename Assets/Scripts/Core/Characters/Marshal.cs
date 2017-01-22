@@ -52,13 +52,13 @@ public class Marshal : AIAgent
         }
         if (completedState.StateID == FSMStateTypes.AI.WAIT)
         {
-            GameManager.Instance.ReturnMarshal(this);
             ReturnHome();
         }
     }
 
     public void ReturnHome()
     {
+        GameManager.Instance.ReturnMarshal(this);
         if (_home != null)
         {
             _nextMoveTag = "home";

@@ -39,6 +39,15 @@ public class GameManager : SingletonBehavior<GameManager>
     [SerializeField]
     private GameObject _cameraRig;
 
+    [SerializeField]
+    private GameObject _tsunamiFX;
+    public GameObject TsunamiFX
+    {
+        get
+        {
+            return _tsunamiFX;
+        }
+    }
 
     [SerializeField]
     private OutlineEffect _outlineEffect;
@@ -330,13 +339,35 @@ public class GameManager : SingletonBehavior<GameManager>
         List<Road> allRoads = GridManager.Instance.GetAllGridObjectsOfType<Road>(GridObjectTypes.Building.ROAD);
         while(_totalSpawns > 0)
         {
+            Road spawnRoad = null;
             int randAmount = Mathf.Clamp(UnityEngine.Random.Range(_minSpawns, _maxSpawns + 1), 0, _totalSpawns);
-            int randRoad = UnityEngine.Random.Range(0, allRoads.Count);
-            allRoads[randRoad].AddCivilians(randAmount);
+            while (spawnRoad == null && allRoads.Count > 0)
+            {
+                int randRoad = UnityEngine.Random.Range(0, allRoads.Count);
+                spawnRoad = allRoads[randRoad];
+                if(spawnRoad.Attachment != null && spawnRoad.Attachment.CompareTag("SafeZone"))
+                {
+                    allRoads.Remove(spawnRoad);
+                    spawnRoad = null;
+                }
+            }
+            if (spawnRoad == null) break;
+
+            spawnRoad.AddCivilians(randAmount);
             _totalSpawns -= randAmount;
-            allRoads.Remove(allRoads[randRoad]);
+            allRoads.Remove(spawnRoad);
         }
-	}
+
+        Builder b = TemplateManager.Instance.Spawn<Builder>(GetRandomBuilderTemplate());
+        AddBuilder(b, false);
+        b.SetHome(HQ);
+
+        Marshal m = TemplateManager.Instance.Spawn<Marshal>(GetRandomMarshalTemplate());
+        AddMarshal(m, false);
+        m.SetHome(HQ);
+
+        WaveManager.Instance.StartNextWaveCountdown();
+    }
 
     public GameObject FindNearestSafeZone(Vector3 position)
     {

@@ -23,6 +23,7 @@ public class Road : BaseBuilding
         {
             Civilian newCivi = TemplateManager.Instance.Spawn<Civilian>(GameManager.Instance.GetRandomCivilianTemplate(), position: transform.position);
             _localPopulation.Add(newCivi);
+            newCivi.SetSpawnpoint(this);
         }
 
 
@@ -60,6 +61,18 @@ public class Road : BaseBuilding
         else
         {
             GameManager.Instance.ShowMessage("Marshal " + _assignedMarshal.Name + " is already coming!");
+        }
+    }
+
+    public void CivilianKilled(Civilian c)
+    {
+        if(_localPopulation.Contains(c))
+        {
+            _localPopulation.Remove(c);
+            if(LocalPopulation == 0 && _assignedMarshal != null)
+            {
+                _assignedMarshal.ReturnHome();
+            }
         }
     }
 

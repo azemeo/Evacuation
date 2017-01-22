@@ -33,6 +33,8 @@ public class Civilian : AIAgent {
     private bool _drowning = false;
     private bool _saved = false;
 
+    private Road _spawnPoint;
+
     public override void OnSpawned()
     {
         base.OnSpawned();
@@ -45,8 +47,14 @@ public class Civilian : AIAgent {
         Wander();
     }
 
+    public void SetSpawnpoint(Road spawnpoint)
+    {
+        _spawnPoint = spawnpoint;
+    }
+
     public void SetLeader(Marshal leader)
     {
+        _spawnPoint = null;
         _leader = leader;
         FollowLeader();
     }
@@ -141,7 +149,10 @@ public class Civilian : AIAgent {
     public virtual void Die()
     {
         _isAlive = false;
-
+        if(_spawnPoint != null)
+        {
+            _spawnPoint.CivilianKilled(this);
+        }
         GameManager.Instance.ShowMessage(Name + " has died! :'(");
 
         Destroy(gameObject);

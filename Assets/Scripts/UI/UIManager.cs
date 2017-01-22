@@ -141,12 +141,18 @@ public class UIManager : SingletonBehavior<UIManager>
 
     void Update()
     {
+        CashDisplay.text = "$" + PlayerProfileManager.Instance.GetResourceBalance(Helpers.ResourceType.Cash);
         if (WaveManager.Instance != null)
         {
-            System.TimeSpan timeToWave = System.TimeSpan.FromSeconds(WaveManager.Instance.NextWaveTime - Time.time);
-            CountdownDisplay.text = string.Format("{0}:{1} until wave {2}", timeToWave.Minutes, timeToWave.Seconds, WaveManager.Instance.NextWave);
-            CashDisplay.text = "$" + PlayerProfileManager.Instance.GetResourceBalance(Helpers.ResourceType.Cash);
-            //WaveStatsDisplay.text = string.Format("Height: {0}m   Danger: {1}", WaveManager.Instance.GetWaveHeight(), WaveManager.Instance.GetWaveDanger());
+            if (TimerManager.Instance.IsTimerRunning("big_wave_arrive"))
+            {
+                CountdownDisplay.text = string.Format("{0} until wave {1}", TimerManager.Instance.GetTimerLeftFormatted("big_wave_arrive"), WaveManager.Instance.NextWave);
+                //WaveStatsDisplay.text = string.Format("Height: {0}m   Danger: {1}", WaveManager.Instance.GetWaveHeight(), WaveManager.Instance.GetWaveDanger());
+            }
+            else
+            {
+                CountdownDisplay.text = "Wave Arrived!";
+            }
         }
     }
 

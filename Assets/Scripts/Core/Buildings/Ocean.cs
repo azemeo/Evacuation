@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Ocean : GridObject {
+public class Ocean : GridObject
+{
     public override float ConstructionTimeRemaining
     {
         get
@@ -20,13 +21,20 @@ public class Ocean : GridObject {
         }
     }
 
-    // Use this for initialization
-    void Start () {
+    protected override void OnEnable()
+    {
+        base.OnEnable();
+        WaveManager.onWaveArrival += Tsunami;
+        _isFlooded = true;
+    }
 
-	}
+    protected override void OnDisable()
+    {
+        base.OnDisable();
+        WaveManager.onWaveArrival -= Tsunami;
+    }
 
-    // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
         if (!HasBeenPlaced) return;
 
