@@ -7,6 +7,8 @@ public class Road : BaseBuilding
 {
     private List<Civilian> _localPopulation = new List<Civilian>();
 
+    private Marshal _assignedMarshal;
+
     public override int GridObjectType
     {
         get
@@ -37,12 +39,28 @@ public class Road : BaseBuilding
     {
         base.Selected();
 
-        //show selection panel
+        SendMarshal();
     }
 
     public void SendMarshal()
     {
-        Marshal m = GameManager.Instance.AssignMarshal();
+        if (_assignedMarshal == null)
+        {
+            _assignedMarshal = GameManager.Instance.AssignMarshal();
+            if (_assignedMarshal != null)
+            {
+                _assignedMarshal.CollectCivilians(this);
+                GameManager.Instance.ShowMessage("Marshal " + _assignedMarshal.Name + " is on his way!");
+            }
+            else
+            {
+                GameManager.Instance.ShowMessage("No Marshals Available!");
+            }
+        }
+        else
+        {
+            GameManager.Instance.ShowMessage("Marshal " + _assignedMarshal.Name + " is already coming!");
+        }
     }
 
     public void Collect(Marshal m)
@@ -56,6 +74,7 @@ public class Road : BaseBuilding
 
             _localPopulation.Clear();
             Collider.enabled = false;
+            _assignedMarshal = null;
         }
     }
 

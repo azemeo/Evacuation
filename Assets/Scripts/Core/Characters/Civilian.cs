@@ -55,7 +55,7 @@ public class Civilian : AIAgent {
     {
         if(_leader != null)
         {
-            SetState(new AIMoveAction(GridManager.Instance.GetCell(GridManager.Instance.GetCoordinatesFromWorldPosition(_leader.transform.position)).Occupant.GetRandomPositionInArea(), 1));
+            SetState(new AIMoveAction(GridManager.Instance.GetCell(GridManager.Instance.GetCoordinatesFromWorldPosition(_leader.transform.position)).Occupant.GetRandomPositionInArea(), 1, usePathfinder: false));
         }
     }
 
@@ -141,6 +141,8 @@ public class Civilian : AIAgent {
     public virtual void Die()
     {
         _isAlive = false;
+
+        GameManager.Instance.ShowMessage(Name + " has died! :'(");
 
         Destroy(gameObject);
         //DamageBarPanel.AddDamageBar(this, UIAnchor, Vector3.up * 2);

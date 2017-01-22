@@ -39,7 +39,7 @@ public class Builder : AIAgent {
         _nextMoveTag = "build";
         _nextMoveDest = _gridObjectTarget.GetRandomPositionInArea();
         SetState(new AIMoveAction(_gridObjectTarget.transform.position, 1));
-
+        GameManager.Instance.ShowMessage("Builder " + Name + " is on it!");
     }
 
     protected override void OnFSMStateComplete(FSMState completedState)

@@ -101,7 +101,7 @@ namespace Pathfinding
 
 			if(startCell == null || endCell == null)
 			{
-				PathData pathData = new PathData(new Vector3[1] {endPoint}, new List<Node>(1) {Nodes[endCell.GridPosition.x, endCell.GridPosition.y]});
+				PathData pathData = new PathData(new Vector3[1] {endPoint}, new List<Node>(1) {null});
 				callback(false, pathData);
 				return;
 			}

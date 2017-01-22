@@ -35,6 +35,7 @@ public class Marshal : AIAgent
             if (_nextMoveTag == "collect")
             {
                 _targetRoad.Collect(this);
+                _targetSafeZone = GameManager.Instance.FindNearestSafeZone(transform.position);
                 _nextMoveTag = "dropoff";
                 SetState(new AIMoveAction(_targetSafeZone.transform.position, 0.5f));
             }
@@ -51,6 +52,7 @@ public class Marshal : AIAgent
         }
         if (completedState.StateID == FSMStateTypes.AI.WAIT)
         {
+            GameManager.Instance.ReturnMarshal(this);
             ReturnHome();
         }
     }

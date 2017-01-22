@@ -24,6 +24,14 @@ public abstract class AIAgent : ConfigurableObject {
     [SerializeField]
     protected string _name;
 
+    public string Name
+    {
+        get
+        {
+            return _name;
+        }
+    }
+
     [SerializeField]
     private Resource _cost;
 

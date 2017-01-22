@@ -341,16 +341,30 @@ public class GameManager : SingletonBehavior<GameManager>
     public GameObject FindNearestSafeZone(Vector3 position)
     {
         GameObject best = null;
+        GameObject closest = null;
         float dist = float.MaxValue;
+        float minDist = float.MaxValue;
         for(int i = 0; i < _safeZones.Length; i++)
         {
             float newDist = (_safeZones[i].transform.position - position).magnitude;
             if(newDist < dist)
             {
-                best = _safeZones[i];
-                dist = newDist;
+                GridObject exit = _safeZones[i].GetComponent<GridObject>();
+                if (newDist < minDist)
+                {
+                    minDist = dist;
+                    closest = _safeZones[i];
+                }
+                if (!exit.IsFlooded)
+                {
+                    best = _safeZones[i];
+                    dist = newDist;
+                }
             }
         }
+
+        if (best == null) best = closest;
+
         return best;
     }
 
