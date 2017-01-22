@@ -4,8 +4,7 @@ using System.Collections;
 
 public class Builder : AIAgent {
 
-    [SerializeField]
-    private Helpers.Resource _cost;
+
 
     private GridObject _home;
 	private GridObject _gridObjectTarget;
@@ -24,7 +23,6 @@ public class Builder : AIAgent {
 
     private string _nextMoveTag = "";
     private Vector3 _nextMoveDest;
-    private bool _boating = false;
 
     public void SetHome(GridObject home)
     {
@@ -75,43 +73,5 @@ public class Builder : AIAgent {
         }
     }
 
-    public void Wander()
-    {
-        GridCell cell = GridManager.Instance.GetCell(GridManager.Instance.GetCoordinatesFromWorldPosition(transform.position));
-        Vector3 min = cell.transform.position;
-        min.x -= 0.4f;
-        min.z -= 0.4f;
 
-        SetState(new AIWanderState(new Rect(min.x, min.z, 1, 1)));
-    }
-
-    protected override void Update()
-    {
-        base.Update();
-
-        GridCell currentCell = GridManager.Instance.GetCell(GridManager.Instance.GetCoordinatesFromWorldPosition(transform.position));
-        if(currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount >= 0.8f && !_boating)
-        {
-            _boating = true;
-            SetAnimationBool("Boat", true);
-        }
-        else if (_boating && currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount < 0.8f)
-        {
-            _boating = false;
-            SetAnimationBool("Boat", false);
-        }
-    }
-
-    public bool IsBoating
-    {
-        get
-        {
-            return _boating;
-        }
-    }
-
-    public Helpers.Resource Cost
-    {
-        get { return _cost; }
-    }
 }

@@ -2,19 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PurchaseBuilderButton : PurchaseButton {
+public class PurchaseMarshalButton : PurchaseButton {
 
     [SerializeField]
-    private Builder _template;
+    private Marshal _template;
 
     public override void Buy(string itemName)
     {
         if (GameManager.Instance.HasResource(_template.Cost.Type, _template.Cost.Amount))
         {
             GameManager.Instance.SpendResource(_template.Cost.Type, _template.Cost.Amount);
-            Builder b = TemplateManager.Instance.Spawn<Builder>(GameManager.Instance.GetRandomBuilderTemplate());
-            GameManager.Instance.AddBuilder(b, false);
-            b.SetHome(GameManager.Instance.HQ);
+            Marshal m = TemplateManager.Instance.Spawn<Marshal>(GameManager.Instance.GetRandomMarshalTemplate());
+            GameManager.Instance.AddMarshal(m, false);
+            m.SetHome(GameManager.Instance.HQ);
         }
     }
 

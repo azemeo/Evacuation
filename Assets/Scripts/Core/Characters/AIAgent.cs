@@ -24,6 +24,9 @@ public abstract class AIAgent : ConfigurableObject {
     [SerializeField]
     protected string _name;
 
+    [SerializeField]
+    private Resource _cost;
+
     private AIFSM _fsm;
 
     [SerializeField]
@@ -35,6 +38,8 @@ public abstract class AIAgent : ConfigurableObject {
     [SerializeField]
 	protected Animator _animator;
 	protected float _movementSpeedModifier = 1.0f;
+
+    private bool _swimming = false;
 
     [SerializeField]
     protected SphereCollider _collider;
@@ -48,6 +53,20 @@ public abstract class AIAgent : ConfigurableObject {
     }
 
 	protected float _currentSpeed = 0;
+
+    protected virtual void OnEnable()
+    {
+        WaveManager.onWaveApproach += OnWaveApproach;
+        WaveManager.onWaveArrival += OnWaveArrive;
+        WaveManager.onWaveRecede += OnWaveRecede;
+    }
+
+    protected virtual void OnDisable()
+    {
+        WaveManager.onWaveApproach -= OnWaveApproach;
+        WaveManager.onWaveArrival -= OnWaveArrive;
+        WaveManager.onWaveRecede -= OnWaveRecede;
+    }
 
     protected virtual void Awake()
     {
@@ -66,6 +85,18 @@ public abstract class AIAgent : ConfigurableObject {
     {
         if (_fsm != null)
             _fsm.Update();
+
+        GridCell currentCell = GridManager.Instance.GetCell(GridManager.Instance.GetCoordinatesFromWorldPosition(transform.position));
+        if (currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount >= 0.8f && !_swimming)
+        {
+            _swimming = true;
+            SetAnimationBool("Swim", true);
+        }
+        else if (_swimming && currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount < 0.8f)
+        {
+            _swimming = false;
+            SetAnimationBool("Swim", false);
+        }
     }
 
     void OnDestroy()
@@ -101,6 +132,20 @@ public abstract class AIAgent : ConfigurableObject {
     }
 
     protected virtual void OnFSMStateComplete(FSMState completedState)
+    {
+
+    }
+
+    protected virtual void OnWaveApproach()
+    {
+
+    }
+    protected virtual void OnWaveArrive()
+    {
+
+    }
+
+    protected virtual void OnWaveRecede()
     {
 
     }
@@ -159,22 +204,6 @@ public abstract class AIAgent : ConfigurableObject {
         }
     }
 
-	public bool HasLineOfSightToPoint(Vector3 point, bool checkIfInside = true)
-    {
-        Vector3 direction = point - transform.position;
-        Ray ray = new Ray(transform.position, direction);
-        if (Physics.Raycast(ray, direction.magnitude, GameManager.LineOfSightMask))
-        {
-            return false;
-        }
-        //extra check to make sure we aren't already "inside" a building
-		if (checkIfInside && Physics.CheckSphere(transform.position, Collider.radius, GameManager.LineOfSightMask))
-        {
-            return false;
-        }
-        return true;
-    }
-
     public override void OnSpawned()
     {
 
@@ -188,6 +217,16 @@ public abstract class AIAgent : ConfigurableObject {
     protected virtual void Reset()
     {
         SetAnimationSpeed(1f);
+    }
+
+    public void Wander()
+    {
+        GridCell cell = GridManager.Instance.GetCell(GridManager.Instance.GetCoordinatesFromWorldPosition(transform.position));
+        Vector3 min = cell.transform.position;
+        min.x -= 0.4f;
+        min.z -= 0.4f;
+
+        SetState(new AIWanderState(new Rect(min.x, min.z, 1, 1)));
     }
 
     //Convienience methods for setting animator properties
@@ -284,5 +323,18 @@ public abstract class AIAgent : ConfigurableObject {
         {
             return _rigidBody;
         }
+    }
+
+    public bool IsSwimming
+    {
+        get
+        {
+            return _swimming;
+        }
+    }
+
+    public Helpers.Resource Cost
+    {
+        get { return _cost; }
     }
 }

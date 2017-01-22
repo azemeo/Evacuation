@@ -12,6 +12,19 @@ public class GameManager : SingletonBehavior<GameManager>
     private Queue<Builder> _availableBuilders = new Queue<Builder>();
     private List<Builder> _workingBuilders = new List<Builder>();
 
+    private Queue<Marshal> _availableMarshals = new Queue<Marshal>();
+    private List<Marshal> _workingMarshals = new List<Marshal>();
+
+    private GameObject[] _safeZones;
+
+    [SerializeField]
+    private int _minSpawns = 10;
+    [SerializeField]
+    private int _maxSpawns = 20;
+
+    [SerializeField]
+    private int _totalSpawns = 100;
+
     private long _spawnIndex;
 
 	private bool _isGameReady = false;
@@ -55,21 +68,15 @@ public class GameManager : SingletonBehavior<GameManager>
         get { return _availableBuilders.Count + _workingBuilders.Count; }
     }
 
-	public static int LineOfSightMask
-	{
-		get
-		{
-			if(_lineOfSightMask == -1)
-			{
-				_lineOfSightMask = 1 << LayerMask.NameToLayer("Building");
-				_lineOfSightMask |= 1 << LayerMask.NameToLayer("Obstacle");
-			}
+    public int AvailableMarshals
+    {
+        get { return _availableMarshals.Count; }
+    }
 
-			return _lineOfSightMask;
-		}
-	}
-
-	private static int _lineOfSightMask = -1;
+    public int TotalMarshals
+    {
+        get { return _availableMarshals.Count + _workingMarshals.Count; }
+    }
 
     #region MONOBEHAVIOR METHODS
 
@@ -111,7 +118,7 @@ public class GameManager : SingletonBehavior<GameManager>
                     gridObject.UID = GetNewUID(gridObject);
                     return gridObject;
                 }
-                Debug.Log("Not enough " + buildingData.BuildingCost.ResourceCost.Type.ToString() + ".");
+                ShowMessage("Not enough Cash!");
             }
             else
             {
@@ -177,9 +184,77 @@ public class GameManager : SingletonBehavior<GameManager>
         }
     }
 
-#endregion
+    #endregion
 
-#region Resource Management
+    #region Builders
+    public void AddMarshal(Marshal newMarshal, bool assigned = false)
+    {
+        if (assigned)
+        {
+            _workingMarshals.Add(newMarshal);
+        }
+        else
+        {
+            _availableMarshals.Enqueue(newMarshal);
+        }
+    }
+
+    public Marshal AssignMarshal()
+    {
+        if (_availableMarshals.Count > 0)
+        {
+            Marshal marshals = _availableMarshals.Dequeue();
+            _workingMarshals.Add(marshals);
+            return marshals;
+        }
+        return null;
+    }
+
+    public void ReturnMarshal(Marshal marshal)
+    {
+        if (_workingMarshals.Contains(marshal))
+        {
+            _workingMarshals.Remove(marshal);
+            _availableMarshals.Enqueue(marshal);
+        }
+    }
+
+    #endregion
+
+    private List<Builder> _builderTemplates;
+    public string GetRandomBuilderTemplate()
+    {
+        if(_builderTemplates == null)
+        {
+            _builderTemplates = TemplateManager.Instance.GetAll<Builder>();
+        }
+
+        return _builderTemplates[UnityEngine.Random.Range(0, _builderTemplates.Count)].TemplateID;
+    }
+
+    private List<Marshal> _marshalTemplates;
+    public string GetRandomMarshalTemplate()
+    {
+        if (_marshalTemplates == null)
+        {
+            _marshalTemplates = TemplateManager.Instance.GetAll<Marshal>();
+        }
+
+        return _marshalTemplates[UnityEngine.Random.Range(0, _marshalTemplates.Count)].TemplateID;
+    }
+
+    private List<Civilian> _civilianTemplates;
+    public string GetRandomCivilianTemplate()
+    {
+        if (_civilianTemplates == null)
+        {
+            _civilianTemplates = TemplateManager.Instance.GetAll<Civilian>();
+        }
+
+        return _civilianTemplates[UnityEngine.Random.Range(0, _civilianTemplates.Count)].TemplateID;
+    }
+
+    #region Resource Management
 
     public bool SpendResource(Helpers.ResourceType resourceType, int amount)
     {
@@ -250,7 +325,34 @@ public class GameManager : SingletonBehavior<GameManager>
 			onGameReady();
 
 		_isGameReady = true;
+
+        _safeZones = GameObject.FindGameObjectsWithTag("SafeZone");
+        List<Road> allRoads = GridManager.Instance.GetAllGridObjectsOfType<Road>(GridObjectTypes.Building.ROAD);
+        while(_totalSpawns > 0)
+        {
+            int randAmount = Mathf.Clamp(UnityEngine.Random.Range(_minSpawns, _maxSpawns + 1), 0, _totalSpawns);
+            int randRoad = UnityEngine.Random.Range(0, allRoads.Count);
+            allRoads[randRoad].AddCivilians(randAmount);
+            _totalSpawns -= randAmount;
+            allRoads.Remove(allRoads[randRoad]);
+        }
 	}
+
+    public GameObject FindNearestSafeZone(Vector3 position)
+    {
+        GameObject best = null;
+        float dist = float.MaxValue;
+        for(int i = 0; i < _safeZones.Length; i++)
+        {
+            float newDist = (_safeZones[i].transform.position - position).magnitude;
+            if(newDist < dist)
+            {
+                best = _safeZones[i];
+                dist = newDist;
+            }
+        }
+        return best;
+    }
 
     public void ShowMessage(string message)
     {

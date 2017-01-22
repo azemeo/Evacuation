@@ -24,7 +24,7 @@ public class PurchaseButton : MonoBehaviour {
         }
 
         DisplayCost();
-        
+
 	}
 
 	// Update is called once per frame
@@ -52,10 +52,7 @@ public class PurchaseButton : MonoBehaviour {
 
     public virtual void Buy(string itemName)
     {
-        if (!BuildingCreator.Instance.CreateBuilding(_templateID))
-        {
-            GameManager.Instance.ShowMessage("Not enough Cash!");
-        }
+        BuildingCreator.Instance.CreateBuilding(_templateID);
     }
 
     protected virtual void DisplayCost()

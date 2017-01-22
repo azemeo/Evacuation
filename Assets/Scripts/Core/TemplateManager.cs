@@ -151,7 +151,7 @@ public class TemplateManager : SingletonBehavior<TemplateManager> {
         return false;
     }
 
-    public T Spawn<T>(string templateID, Transform parent = null) where T : ConfigurableObject
+    public T Spawn<T>(string templateID, Transform parent = null, Vector3? position = null) where T : ConfigurableObject
     {
         T template = getSpawnedTemplate<T>(templateID);
         if (template == null)
@@ -160,10 +160,10 @@ public class TemplateManager : SingletonBehavior<TemplateManager> {
             return default(T);
         }
 
-        return Spawn<T>(template, parent);
+        return Spawn<T>(template, parent, position);
     }
 
-    public T Spawn<T>(ConfigurableObject template, Transform parent = null) where T : ConfigurableObject
+    public T Spawn<T>(ConfigurableObject template, Transform parent = null, Vector3? position = null) where T : ConfigurableObject
     {
         T retObject = PoolBoss.Spawn(template.transform, Vector3.zero, Quaternion.identity, null, false).GetComponent<T>();
 
@@ -173,6 +173,11 @@ public class TemplateManager : SingletonBehavior<TemplateManager> {
             {
                 retObject.transform.SetParent(parent);
             }
+            if(position.HasValue)
+            {
+                retObject.transform.position = position.Value;
+            }
+
             retObject.gameObject.SetActive(true);
 
             ISpawnableObject[] spawnListeners = retObject.GetComponents<ISpawnableObject>();
