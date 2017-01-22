@@ -109,6 +109,13 @@ public abstract class BaseBuilding : PurchasableObject {
 
     #endregion
 
+    protected override void Die()
+    {
+        _model.gameObject.SetActive(false);
+
+        base.Die();
+    }
+
     #region Public Accessors
 
     public bool IsBuilding

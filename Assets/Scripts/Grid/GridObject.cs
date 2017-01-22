@@ -10,9 +10,13 @@ public abstract class GridObject : ConfigurableObject
 
     public abstract int GridObjectType { get; }
 
-	[SerializeField] protected int _movementCost = 2;
+    protected AudioSource _audioSource;
+    [SerializeField] protected AudioClip _destructionSound;
+    private bool isDead = false;
+
+    [SerializeField] protected int _movementCost = 2;
     [SerializeField] private Transform _uiAnchor;
-	[SerializeField] protected BoxCollider _collider;
+    [SerializeField] protected BoxCollider _collider;
 
 	protected Vector2Int _coordinates;
 
@@ -193,6 +197,8 @@ public abstract class GridObject : ConfigurableObject
 		_collider.transform.localScale = Vector3.one;
 		_collider.center = Vector3.zero;
 		_collider.size = new Vector3(1, 1, 1);
+
+        _audioSource = GetComponent<AudioSource>();
     }
 
 	public override void OnDespawned()
@@ -466,7 +472,24 @@ public abstract class GridObject : ConfigurableObject
 
     protected virtual void Die()
     {
-        gameObject.SetActive(false);
+        if (isDead) return;
+
+        if (_audioSource != null && _destructionSound != null)
+        {
+            print("Playing DestructionSound");
+            AudioManager.Instance.Play(_audioSource, _destructionSound, AudioManager.AudioGroup.Other);
+        }
+
+        isDead = true;
+
+        DraggableObject draggable = GetComponent<DraggableObject>();
+        if (draggable != null)
+        {
+            Destroy(draggable);
+        }
+        Destroy(this);
+        
+        //gameObject.SetActive(false);
     }
 
     public virtual void Drain(float amount)
