@@ -15,6 +15,11 @@ public class PurchaseMarshalButton : PurchaseButton {
             Marshal m = TemplateManager.Instance.Spawn<Marshal>(GameManager.Instance.GetRandomMarshalTemplate());
             GameManager.Instance.AddMarshal(m, false);
             m.SetHome(GameManager.Instance.HQ);
+            GameManager.Instance.ShowMessage("A new Marshall has arrived!");
+        }
+        else
+        {
+            GameManager.Instance.ShowMessage("You cannot afford a marhsall :(");
         }
     }
 
