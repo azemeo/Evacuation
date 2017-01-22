@@ -15,6 +15,11 @@ public class PurchaseBuilderButton : PurchaseButton {
             Builder b = TemplateManager.Instance.Spawn<Builder>(GameManager.Instance.GetRandomBuilderTemplate());
             GameManager.Instance.AddBuilder(b, false);
             b.SetHome(GameManager.Instance.HQ);
+            GameManager.Instance.ShowMessage("A new builder has arrived!");
+        }
+        else
+        {
+            GameManager.Instance.ShowMessage("You annot afford a builder :(");
         }
     }
 
