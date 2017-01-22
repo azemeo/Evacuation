@@ -502,34 +502,55 @@ public abstract class GridObject : ConfigurableObject
 
     }
 
-    public virtual void Tsunami()
+    public virtual void Tsunami(float force)
     {
         if(IsFlooded)
         {
             if (_hasHadWave) return;
 
-            new Job(PropegateWave());
+            new Job(PropegateWave(force));
         }
         else
         {
-            Flood();
+            HitByWave(force);
         }
         _hasHadWave = true;
     }
 
-    private IEnumerator PropegateWave()
+    private IEnumerator PropegateWave(float force)
     {
         PoolBoss.Spawn(GameManager.Instance.TsunamiFX.transform, transform.position, Quaternion.identity, null, true);
         WaveManager.Instance.ResetRecedeTimer();
         yield return new WaitForSeconds(0.8f);
+
         GridCell[] neighbours = GridManager.Instance.GetNeighbors(Coordinates);
         for (int i = 0; i < neighbours.Length; i++)
         {
             if (neighbours[i].IsOccupied)
             {
-                neighbours[i].Occupant.Tsunami();
+                if (neighbours[i].Occupant.Coordinates.y > Coordinates.y)
+                {
+                    neighbours[i].Occupant.Tsunami(force);
+                }
+                else
+                {
+                    if(neighbours[i].Occupant.Attachment == null)
+                    {
+                        neighbours[i].Occupant.Tsunami(force);
+                    }
+                    else
+                    {
+                        neighbours[i].Occupant.Tsunami(0.25f);
+                    }
+                }
             }
         }
+    }
+
+    private void HitByWave(float force)
+    {
+        FillRate += WaveManager.Instance.WaveDanger * force * 0.1f;
+        AddToFillAmount(FillRate * WaveManager.Instance.WaveDanger * force);
     }
 
     private void ResetTsunami()
@@ -567,6 +588,18 @@ public abstract class GridObject : ConfigurableObject
                 return Attachment.FillRate;
             }
             return _fillRate;
+        }
+
+        set
+        {
+            if (Attachment != null)
+            {
+                Attachment.FillRate = value;
+            }
+            else
+            {
+                _fillRate = value;
+            }
         }
     }
 

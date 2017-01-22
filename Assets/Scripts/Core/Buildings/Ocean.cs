@@ -24,14 +24,19 @@ public class Ocean : GridObject
     protected override void OnEnable()
     {
         base.OnEnable();
-        WaveManager.onWaveArrival += Tsunami;
+        WaveManager.onWaveArrival += WaveArrived;
         _isFlooded = true;
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-        WaveManager.onWaveArrival -= Tsunami;
+        WaveManager.onWaveArrival -= WaveArrived;
+    }
+
+    private void WaveArrived()
+    {
+        Tsunami(1);
     }
 
     protected override void Update()
