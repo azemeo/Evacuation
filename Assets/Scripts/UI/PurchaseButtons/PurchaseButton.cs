@@ -14,6 +14,8 @@ public class PurchaseButton : MonoBehaviour {
     [SerializeField]
     private BaseBuilding buildingTemplate;
 
+    public KeyCode hotkey = KeyCode.None;
+
 	// Use this for initialization
 	protected void Start () {
         if (popup == null)
@@ -27,7 +29,10 @@ public class PurchaseButton : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-
+        if (Input.GetKeyDown(hotkey))
+        {
+            Buy();
+        }
 	}
 
     public void OnMouseEnter()
@@ -40,13 +45,14 @@ public class PurchaseButton : MonoBehaviour {
         popup.gameObject.SetActive(false);
     }
 
+    public virtual void Buy()
+    {
+        Buy(_templateID);
+    }
+
     public virtual void Buy(string itemName)
     {
-        if (BuildingCreator.Instance.CreateBuilding(_templateID))
-        {
-            print("Purchased" + itemName);
-        }
-        else
+        if (!BuildingCreator.Instance.CreateBuilding(_templateID))
         {
             GameManager.Instance.ShowMessage("Not enough Cash!");
         }

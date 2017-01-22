@@ -67,4 +67,12 @@ public class UIPlacementPanel : UIPanel {
         GridManager.Instance.DeselectObject();
         Hide();
     }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            ConfirmPlacementPressed();
+        }
+    }
 }
