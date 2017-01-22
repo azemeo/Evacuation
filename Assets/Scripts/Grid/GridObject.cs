@@ -121,7 +121,14 @@ public abstract class GridObject : ConfigurableObject
 
 	public int MovementCost
 	{
-		get { return _movementCost; }
+		get
+        {
+            if(Attachment != null)
+            {
+                return Attachment.MovementCost;
+            }
+            return _movementCost;
+        }
 		set { _movementCost = value; }
 	}
 

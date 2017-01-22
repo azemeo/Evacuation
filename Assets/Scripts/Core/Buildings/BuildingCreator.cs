@@ -16,7 +16,15 @@ public class BuildingCreator : SingletonBehavior<BuildingCreator> {
 
     public bool CreateBuilding(string templateID)
     {
-		return TryBuild(templateID);
+        if (GameManager.Instance.AvailableBuilders > 0)
+        {
+            return TryBuild(templateID);
+        }
+        else
+        {
+            GameManager.Instance.ShowMessage("All Workers are currently busy!");
+            return false;
+        }
     }
 
 	private bool TryBuild(string templateID)
