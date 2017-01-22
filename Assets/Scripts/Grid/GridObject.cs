@@ -41,7 +41,7 @@ public abstract class GridObject : ConfigurableObject
     public GridEvent OnDetached;
     public GridEvent OnConfirmPlacement;
 
-	protected AIAgent _assignedBuilder;
+	protected Builder _assignedBuilder;
 
     [SerializeField]
     protected float _fillRate = 0.1f;
@@ -177,6 +177,7 @@ public abstract class GridObject : ConfigurableObject
 
 	public override void OnSpawned()
     {
+        transform.localPosition = Vector3.zero;
 		_collider.transform.localScale = Vector3.one;
 		_collider.center = Vector3.zero;
 		_collider.size = new Vector3(1, 1, 1);
@@ -282,7 +283,7 @@ public abstract class GridObject : ConfigurableObject
     #endregion
 
 
-    public virtual void AssignBuilder(AIAgent builder = null)
+    public virtual void AssignBuilder(Builder builder = null)
     {
         _assignedBuilder = builder;
 
@@ -293,7 +294,7 @@ public abstract class GridObject : ConfigurableObject
 
         if (_assignedBuilder != null)
         {
-            //_assignedBuilder.SetBuilderTarget(this, builder != null);
+            _assignedBuilder.SetTarget(this);
         }
     }
 
@@ -301,9 +302,8 @@ public abstract class GridObject : ConfigurableObject
     {
         if (_assignedBuilder != null)
         {
-            //_assignedBuilder.SetBehavior(Troop.TroopStatus.Idle);
             GameManager.Instance.ReturnBuilder(_assignedBuilder);
-            //_assignedBuilder.ReturnHome();
+            _assignedBuilder.ReturnHome();
             _assignedBuilder = null;
         }
     }
@@ -382,7 +382,7 @@ public abstract class GridObject : ConfigurableObject
     {
         _parentObject = parent;
         transform.SetParent(parent.transform);
-        transform.localPosition = Vector3.zero;
+        //transform.localPosition = Vector3.zero;
     }
 
     public virtual void DetachObject()

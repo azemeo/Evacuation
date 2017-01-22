@@ -9,12 +9,19 @@ public class GameManager : SingletonBehavior<GameManager>
 {
 	public static event Action onGameReady;
 
-    private Queue<AIAgent> _availableBuilders = new Queue<AIAgent>();
-    private List<AIAgent> _workingBuilders = new List<AIAgent>();
+    private Queue<Builder> _availableBuilders = new Queue<Builder>();
+    private List<Builder> _workingBuilders = new List<Builder>();
 
     private long _spawnIndex;
 
 	private bool _isGameReady = false;
+
+    [SerializeField]
+    private GridObject _headquarters;
+    public GridObject HQ
+    {
+        get { return _headquarters; }
+    }
 
     [SerializeField]
     private GameObject _cameraRig;
@@ -138,7 +145,7 @@ public class GameManager : SingletonBehavior<GameManager>
 
 
 #region Builders
-    public void AddBuilder(AIAgent newBuilder, bool assigned = false)
+    public void AddBuilder(Builder newBuilder, bool assigned = false)
     {
         if (assigned)
         {
@@ -150,18 +157,18 @@ public class GameManager : SingletonBehavior<GameManager>
         }
     }
 
-    public AIAgent AssignBuilder()
+    public Builder AssignBuilder()
     {
         if (_availableBuilders.Count > 0)
         {
-            AIAgent builder = _availableBuilders.Dequeue();
+            Builder builder = _availableBuilders.Dequeue();
             _workingBuilders.Add(builder);
             return builder;
         }
         return null;
     }
 
-    public void ReturnBuilder(AIAgent builder)
+    public void ReturnBuilder(Builder builder)
     {
         if (_workingBuilders.Contains(builder))
         {
