@@ -13,6 +13,8 @@ public class WaveManager : SingletonBehavior<WaveManager> {
     public int NextWaveTime = 120;
     public int WaveWarningTme = 15;
 
+    public float WaveDanger = 2.5f;
+
     public int GetWaveHeight () { return NextWave * 5; }
     public int GetWaveHeight (int waveNumber) { return waveNumber* 5; }
 
@@ -59,6 +61,7 @@ public class WaveManager : SingletonBehavior<WaveManager> {
         if (TimerManager.Instance.IsTimerRunning("big_wave_warning")) TimerManager.Instance.CancelTimer("big_wave_warning");
         if (TimerManager.Instance.IsTimerRunning("big_wave_recede")) TimerManager.Instance.CancelTimer("big_wave_recede");
         NextWave++;
+        WaveDanger += 0.5f;
         onWaveArrival();
 
     }
