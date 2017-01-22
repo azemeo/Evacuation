@@ -20,6 +20,14 @@ public abstract class AIAgent : ConfigurableObject {
 		}
 	}
 
+    public override string TemplateID
+    {
+        get
+        {
+            return Name;
+        }
+    }
+
     [Header("AIAgent Setup")]
     [SerializeField]
     protected string _name;

@@ -9,7 +9,7 @@ public abstract class ConfigurableObject : MonoBehaviour, ISpawnableObject
     [SerializeField]
     protected string _templateID = "";
 
-    public string TemplateID
+    public virtual string TemplateID
     {
         get
         {
