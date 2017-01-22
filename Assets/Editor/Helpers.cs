@@ -13,9 +13,9 @@ public class Helpers : MonoBehaviour {
         {
             GridObject go = selection[i] as GridObject;
             Vector3 pos = go.transform.position;
-            pos.x = Mathf.RoundToInt(pos.x);
+            pos.x = Mathf.RoundToInt(pos.x) + 0.5f;
             pos.y = Mathf.RoundToInt(pos.y);
-            pos.z = Mathf.RoundToInt(pos.z);
+            pos.z = Mathf.RoundToInt(pos.z) - 0.5f;
             go.transform.position = pos;
         }
     }
