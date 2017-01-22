@@ -11,15 +11,28 @@ public class PurchaseButton : MonoBehaviour {
     [SerializeField]
     private string _templateID;
 
+    [SerializeField]
+    private BaseBuilding buildingTemplate;
+
+    public KeyCode hotkey = KeyCode.None;
+
 	// Use this for initialization
 	protected void Start () {
-        if(popup == null)
+        if (popup == null)
+        {
             popup = transform.FindChild("Popup Panel");
+        }
+
+        DisplayCost();
+        
 	}
 
 	// Update is called once per frame
 	void Update () {
-
+        if (Input.GetKeyDown(hotkey))
+        {
+            Buy();
+        }
 	}
 
     public void OnMouseEnter()
@@ -32,15 +45,25 @@ public class PurchaseButton : MonoBehaviour {
         popup.gameObject.SetActive(false);
     }
 
+    public virtual void Buy()
+    {
+        Buy(_templateID);
+    }
+
     public virtual void Buy(string itemName)
     {
-        if (BuildingCreator.Instance.CreateBuilding(_templateID))
-        {
-            print("Purchased" + itemName);
-        }
-        else
+        if (!BuildingCreator.Instance.CreateBuilding(_templateID))
         {
             GameManager.Instance.ShowMessage("Not enough Cash!");
+        }
+    }
+
+    protected virtual void DisplayCost()
+    {
+        Text costDisplay = transform.FindChild("Cost Display").GetComponent<Text>();
+        if (costDisplay != null && buildingTemplate != null)
+        {
+            costDisplay.text = "$" + buildingTemplate.BuildingCost.ResourceCost.Amount;
         }
     }
 }

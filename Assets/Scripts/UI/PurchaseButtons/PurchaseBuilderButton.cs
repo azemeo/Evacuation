@@ -17,4 +17,13 @@ public class PurchaseBuilderButton : PurchaseButton {
             b.SetHome(GameManager.Instance.HQ);
         }
     }
+
+    protected override void DisplayCost()
+    {
+        UnityEngine.UI.Text costDisplay = transform.FindChild("Cost Display").GetComponent<UnityEngine.UI.Text>();
+        if (costDisplay != null && _template != null)
+        {
+            costDisplay.text = "$" + _template.Cost.Amount;
+        }
+    }
 }
