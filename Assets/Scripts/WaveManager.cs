@@ -26,13 +26,14 @@ public class WaveManager : SingletonBehavior<WaveManager> {
 
     public void ResetRecedeTimer()
     {
-        TimerManager.Instance.StartTimerNow("big_wave_recede", 1);
+        TimerManager.Instance.StartTimerNow("big_wave_recede", 3);
     }
 
     private void OnTimerExpired(TimerManager.TimerEventData data)
     {
         if(data.id == "big_wave_arrive")
         {
+            NextWave++;
             onWaveArrival();
         }
         if(data.id == "big_wave_recede")

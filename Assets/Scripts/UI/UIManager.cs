@@ -145,7 +145,6 @@ public class UIManager : SingletonBehavior<UIManager>
         CashDisplay.text = "$" + PlayerProfileManager.Instance.GetResourceBalance(Helpers.ResourceType.Cash);
         if (WaveManager.Instance != null)
         {
-
             if (TimerManager.Instance.IsTimerRunning("big_wave_arrive"))
             {
                 CountdownDisplay.text = string.Format("{0} until wave {1}", TimerManager.Instance.GetTimerLeftFormatted("big_wave_arrive"), WaveManager.Instance.NextWave);
@@ -155,9 +154,6 @@ public class UIManager : SingletonBehavior<UIManager>
             {
                 CountdownDisplay.text = "Wave Arrived!";
             }
-            System.TimeSpan timeToWave = System.TimeSpan.FromSeconds(WaveManager.Instance.NextWaveTime - Time.time);
-            CountdownDisplay.text = string.Format("{0}:{1} until wave {2}", timeToWave.Minutes, timeToWave.Seconds, WaveManager.Instance.NextWave);
-            CashDisplay.text = "$" + PlayerProfileManager.Instance.GetResourceBalance(Helpers.ResourceType.Cash);
          }
 
         if (AvailableBuildersDisplay != null && AvailableMarshalsDisplay != null)
