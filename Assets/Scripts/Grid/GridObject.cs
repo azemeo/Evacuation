@@ -213,6 +213,7 @@ public abstract class GridObject : ConfigurableObject
     protected virtual void GridCreated()
     {
         SetCoordinates(GridManager.Instance.GetCoordinatesFromWorldPosition(transform.position));
+        UID = GameManager.Instance.GetNewUID(this);
         if (_parentObject != null)
         {
             _parentObject.AttachObject(this);
