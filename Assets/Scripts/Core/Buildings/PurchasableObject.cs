@@ -23,7 +23,14 @@ public abstract class PurchasableObject : GridObject {
 			// Still doing a check here just in case.
 			if (GameManager.Instance.SpendResource(BuildingCost.ResourceCost.Type, BuildingCost.ResourceCost.Amount))
 			{
-				StartBuild();
+                if (_requiresBuilder)
+                {
+                    AssignBuilder();
+                }
+                else
+                {
+                    StartBuild();
+                }
 			}
 			else
 			{
@@ -34,6 +41,4 @@ public abstract class PurchasableObject : GridObject {
 
 		base.Placed();
 	}
-
-	protected virtual void StartBuild() {}
 }

@@ -22,7 +22,7 @@ public class AIMoveAction : AIState {
     protected AIAgent _cachedAgent;
     protected Vector3 _facingDirection = Vector3.forward;
     protected Quaternion _lookRotation = Quaternion.LookRotation(Vector3.forward);
-    private bool _usePathfinder = true;
+    private bool _usePathfinder = false;
 
     protected AIMoveAction() {}
 
@@ -36,6 +36,7 @@ public class AIMoveAction : AIState {
 
 	public AIMoveAction(Vector3[] waypoints, float normalizedSpeed, string tag = "")
 	{
+        _usePathfinder = false;
 		_waypoints = waypoints;
 		_normalizedSpeed = normalizedSpeed;
         _tag = tag;
@@ -46,11 +47,18 @@ public class AIMoveAction : AIState {
 		base.EnterState ();
         _cachedAgent = Agent;
 		_cachedAgent.CurrentSpeed = _cachedAgent.MovementSpeed * _normalizedSpeed; // Mathf.Lerp(_currentSpeed, _cachedAgent.MovementSpeed * _normalizedSpeed, 0.1f);
-        Agent.SetAnimationFloat("Velocity", 1f);
-        Agent.SetAnimationSpeed(_normalizedSpeed);
         if(_usePathfinder)
         {
             Pathfinder.Instance.FindPath(Agent.GetHashCode(), Agent.transform.position, _dest, PathFound);
+        }
+        else
+        {
+            if(_waypoints == null)
+            {
+                _waypoints = new Vector3[] { _dest };
+            }
+            Agent.SetAnimationFloat("Velocity", 1f);
+            Agent.SetAnimationSpeed(_normalizedSpeed);
         }
     }
 
@@ -64,6 +72,8 @@ public class AIMoveAction : AIState {
         {
             _waypoints = new Vector3[] { _dest };
         }
+        Agent.SetAnimationFloat("Velocity", 1f);
+        Agent.SetAnimationSpeed(_normalizedSpeed);
     }
 
     public override void ExitState ()

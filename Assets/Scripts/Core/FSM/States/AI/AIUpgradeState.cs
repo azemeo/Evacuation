@@ -46,7 +46,7 @@ public class AIUpgradeState : AIState
                 break;
 
             case FSMStateTypes.AI.BUILD:
-                _childFSM.SetState(new AIMoveAction(_target.GetRandomPerimiterPosition(), 1f));
+                _childFSM.SetState(new AIMoveAction(_target.GetRandomPerimiterPosition(), 1f, usePathfinder: false));
                 break;
             default:
                 break;

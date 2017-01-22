@@ -21,13 +21,9 @@ public abstract class BaseBuilding : PurchasableObject {
     protected BuildingLevel _buildingLevel;
 
     [SerializeField]
-    private bool _requiresBuilder = false;
-
-    [SerializeField]
     protected GameObject _model;
 
     protected bool _isAlive = true;
-
 
 
     #region MonoBehaviour Methods
@@ -56,14 +52,12 @@ public abstract class BaseBuilding : PurchasableObject {
 
     #region Core Methods
 
-    protected override void StartBuild()
+    public override void StartBuild()
     {
         if (BuildingCost.BuildTime > 0)
         {
-            if (_requiresBuilder) AssignBuilder();
-
             TimerManager.Instance.StartTimerNow(UID + "_build", BuildingCost.BuildTime);
-            UIManager.Instance.Get<UIBuildTimersPanel>(UIManager.PanelID.BuildTimersPanel).AddTimer(UID + "_build", UIAnchor, Vector3.up * 0.5f);
+            UIManager.Instance.Get<UIBuildTimersPanel>(UIManager.PanelID.BuildTimersPanel).AddTimer(UID + "_build", UIAnchor, Vector3.up * 0.5f + Vector3.forward * -0.5f);
             if (_constructionGraphic != null)
             {
                 _constructionGraphic.SetActive(true);
@@ -119,7 +113,7 @@ public abstract class BaseBuilding : PurchasableObject {
 
     public bool IsBuilding
     {
-        get { return TimerManager.Instance.IsTimerRunning(UID + "_build"); }
+        get { return _assignedBuilder != null; }
     }
 
     public override float ConstructionTimeRemaining

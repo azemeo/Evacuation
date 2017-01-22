@@ -62,7 +62,7 @@ public abstract class AIAgent : ConfigurableObject {
         _fsm.onStateComplete += OnFSMStateComplete;
     }
 
-    void Update()
+    protected virtual void Update()
     {
         if (_fsm != null)
             _fsm.Update();

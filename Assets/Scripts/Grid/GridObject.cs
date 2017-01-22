@@ -44,6 +44,9 @@ public abstract class GridObject : ConfigurableObject
 	protected Builder _assignedBuilder;
 
     [SerializeField]
+    protected bool _requiresBuilder = false;
+
+    [SerializeField]
     protected float _fillRate = 0.1f;
 
     [SerializeField]
@@ -304,6 +307,8 @@ public abstract class GridObject : ConfigurableObject
             _assignedBuilder.SetTarget(this);
         }
     }
+
+    public virtual void StartBuild() { }
 
     public virtual void ReturnBuilder()
     {

@@ -72,7 +72,7 @@ public class AIWanderState : AIState {
 
     public void WaitComplete()
     {
-		_childFSM.SetState(new AIMoveAction(GetRandomPositionInArea(), 1f));
+		_childFSM.SetState(new AIMoveAction(GetRandomPositionInArea(), 1f, usePathfinder: false));
     }
 
 	private Vector3 GetRandomPositionInArea()

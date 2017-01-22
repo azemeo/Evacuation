@@ -24,6 +24,7 @@ public class Builder : AIAgent {
 
     private string _nextMoveTag = "";
     private Vector3 _nextMoveDest;
+    private bool _boating = false;
 
     public void SetHome(GridObject home)
     {
@@ -51,6 +52,7 @@ public class Builder : AIAgent {
         {
             if (_nextMoveTag == "build")
             {
+                _gridObjectTarget.StartBuild();
                 SetState(new AIUpgradeState(_gridObjectTarget));
             }
             else if (_nextMoveTag == "home")
@@ -81,6 +83,31 @@ public class Builder : AIAgent {
         min.z -= 0.4f;
 
         SetState(new AIWanderState(new Rect(min.x, min.z, 1, 1)));
+    }
+
+    protected override void Update()
+    {
+        base.Update();
+
+        GridCell currentCell = GridManager.Instance.GetCell(GridManager.Instance.GetCoordinatesFromWorldPosition(transform.position));
+        if(currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount >= 0.8f && !_boating)
+        {
+            _boating = true;
+            SetAnimationBool("Boat", true);
+        }
+        else if (_boating && currentCell.Occupant != null && currentCell.Occupant.CurrentFillAmount < 0.8f)
+        {
+            _boating = false;
+            SetAnimationBool("Boat", false);
+        }
+    }
+
+    public bool IsBoating
+    {
+        get
+        {
+            return _boating;
+        }
     }
 
     public Helpers.Resource Cost

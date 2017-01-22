@@ -16,7 +16,7 @@ public class Pump : BaseBuilding
 
     protected override void Update()
     {
-        if (!HasBeenPlaced || ParentObject == null) return;
+        if (!HasBeenPlaced || ParentObject == null || IsBuilding) return;
 
         GridCell[] neighbours = GridManager.Instance.GetNeighbors(Coordinates);
         for (int i = 0; i < neighbours.Length; i++)
