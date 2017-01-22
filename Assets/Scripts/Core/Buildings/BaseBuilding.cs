@@ -63,7 +63,7 @@ public abstract class BaseBuilding : PurchasableObject {
             if (_requiresBuilder) AssignBuilder();
 
             TimerManager.Instance.StartTimerNow(UID + "_build", BuildingCost.BuildTime);
-            UIManager.Instance.Get<UIBuildTimersPanel>(UIManager.PanelID.BuildTimersPanel).AddTimer(UID + "_build", UIAnchor, Vector3.up * 2);
+            UIManager.Instance.Get<UIBuildTimersPanel>(UIManager.PanelID.BuildTimersPanel).AddTimer(UID + "_build", UIAnchor, Vector3.up * 0.5f);
             if (_constructionGraphic != null)
             {
                 _constructionGraphic.SetActive(true);

@@ -13,6 +13,7 @@ public class PurchaseBuilderButton : PurchaseButton {
         {
             GameManager.Instance.SpendResource(_template.Cost.Type, _template.Cost.Amount);
             Builder b = TemplateManager.Instance.Spawn<Builder>(_template.TemplateID);
+            GameManager.Instance.AddBuilder(b, false);
             b.SetHome(GameManager.Instance.HQ);
         }
     }

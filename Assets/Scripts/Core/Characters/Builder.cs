@@ -80,10 +80,7 @@ public class Builder : AIAgent {
         min.x -= 0.4f;
         min.z -= 0.4f;
 
-        Vector3 max = cell.transform.position;
-        max.x += 0.4f;
-        max.z += 0.4f;
-        SetState(new AIWanderState(new Rect(min.x, min.y, 1, 1)));
+        SetState(new AIWanderState(new Rect(min.x, min.z, 1, 1)));
     }
 
     public Helpers.Resource Cost
