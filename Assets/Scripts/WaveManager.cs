@@ -33,8 +33,7 @@ public class WaveManager : SingletonBehavior<WaveManager> {
     {
         if(data.id == "big_wave_arrive")
         {
-            NextWave++;
-            onWaveArrival();
+            TriggerWave();
         }
         if(data.id == "big_wave_recede")
         {
@@ -52,5 +51,15 @@ public class WaveManager : SingletonBehavior<WaveManager> {
     {
         TimerManager.Instance.StartTimerNow("big_wave_arrive", NextWaveTime);
         TimerManager.Instance.StartTimerNow("big_wave_warning", NextWaveTime-WaveWarningTme);
+    }
+
+    public void TriggerWave()
+    {
+        if (TimerManager.Instance.IsTimerRunning("big_wave_arrive")) TimerManager.Instance.CancelTimer("big_wave_arrive");
+        if (TimerManager.Instance.IsTimerRunning("big_wave_warning")) TimerManager.Instance.CancelTimer("big_wave_warning");
+        if (TimerManager.Instance.IsTimerRunning("big_wave_recede")) TimerManager.Instance.CancelTimer("big_wave_recede");
+        NextWave++;
+        onWaveArrival();
+
     }
 }
